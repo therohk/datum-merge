@@ -51,7 +51,7 @@ It decides whether a change to the value of the field is allowed during a merge 
 The same field within a source and target object is represented by `s` and `t` respectively.
 Whether the strategy requires data to be present for the field, is shown by { 0=no, 1=yes, X=irrelavant }. 
 The value of the source field is migrated to the target field only if the predicate passes.
-See the implementation of this logic in [merge-low.ts](datum-merge/src/merge-low.ts).
+See the implementation of this logic in [merge-low.ts](src/merge-low.ts).
 
 | Code Value | Predicate | Meaning |
 |----|----|----|
