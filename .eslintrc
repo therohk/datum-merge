@@ -1,0 +1,32 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "node": true
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "@typescript-eslint/no-extra-semi": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "args": "none" }],
+    "@typescript-eslint/ban-ts-comment": "off",
+    "no-prototype-builtins": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "complexity": ["error", { "max": 10 }]
+  },
+  "ignorePatterns": [
+    "node_modules",
+    "dist/*",
+    "src/diff-lib/*"
+  ]
+}
