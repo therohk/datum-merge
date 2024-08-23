@@ -1,0 +1,18 @@
+# vscode
+.vscode 
+
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+main.js
+dist
+
+# Exclude sourcemaps
+*.map
+
+# Exclude macOS Finder (System Explorer) View States
+.DS_Store
+yarn.lock
