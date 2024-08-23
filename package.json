@@ -1,6 +1,6 @@
 {
 	"name": "datum-merge",
-	"version": "0.3.1-alpha",
+	"version": "0.5.1",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"repository": {
 		"type": "git",
@@ -12,7 +12,8 @@
 	"main": "dist/esm/index.js",
 	"types": "dist/esm/index.d.ts",
 	"files": [
-		"dist"
+		"dist",
+		"src"
 	],
 	"engines": {
 		"node": "^20",
