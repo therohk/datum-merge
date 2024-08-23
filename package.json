@@ -1,6 +1,6 @@
 {
 	"name": "datum-merge",
-	"version": "0.5.1",
+	"version": "0.3.0-alpha",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"repository": {
 		"type": "git",
@@ -19,13 +19,13 @@
 		"npm": ">=10"
 	},
 	"scripts": {
-		"dev": "node esbuild.config.mjs",
 		"lint": "npx eslint src",
 		"pretty": "prettier -c src",
 		"scantask": "findstr /s /i todo src\\*.*",
 		"test": "jest",
 		"build:esm": "tsc",
 		"build:cjs": "tsc --module CommonJS --outDir dist/cjs",
+		"build": "run-s test build:*",
 		"compile": "tsc -noEmit -skipLibCheck",
 		"cyccheck": "dpdm --exit-code circular:1 --no-tree ./src"
 	},
