@@ -12,7 +12,10 @@ export { observableDiff };
 export { orderIndependentObservableDiff };
 export { applyChange, revertChange };
 export { applyDiff }; //prefer merge
-export { getOrderIndependentHash }; //for tests
+
+//for tests
+export { realTypeOf };
+export { getOrderIndependentHash };
 
 type DiffNew<RHS> = {
     readonly kind: "N";
@@ -43,11 +46,6 @@ type DiffArray<LHS, RHS = LHS> = {
 type Diff<LHS, RHS = LHS> = DiffNew<RHS> | DiffDeleted<LHS> | DiffEdit<LHS, RHS> | DiffArray<LHS, RHS>;
 type DiffKind = Diff<any, any>["kind"];
 
-type Primitive = string | number | boolean;
-type PrimitiveAll = Primitive | bigint | symbol;
-type FieldKey = string | number | symbol;
-type FieldPath = FieldKey[];
-
 type PreFilterFunction = (path: any[], key: any) => boolean;
 type PreFilterObject<LHS, RHS = LHS> = {
     prefilter?(path: any[], key: any): boolean;
@@ -63,8 +61,9 @@ type Accumulator<LHS, RHS = LHS> = {
 
 type Observer<LHS, RHS = LHS> = (diff: Diff<LHS, RHS>) => void;
 
+type FieldKey = string | number | symbol;
+type FieldPath = FieldKey[];
 // type StackItem<LHS, RHS = LHS> = { lhs: LHS, rhs: RHS };
-
 
 const typeNormalizer: PreFilterObject<any, any> = {
     normalize: function (currentPath: any, key: any, lhs: any, rhs: any): [any, any] {
@@ -148,7 +147,6 @@ function orderIndependentObservableDiff<LHS, RHS = LHS>(
     deepDiff(lhs, rhs, changes, prefilter, path, key, stack, true);
 }
 
-// function deepDiff(lhs, rhs, changes, prefilter, path, key, stack, orderIndependent) {
 function deepDiff<LHS, RHS = LHS>(
     lhs: LHS,
     rhs: RHS,
@@ -224,9 +222,6 @@ function deepDiff<LHS, RHS = LHS>(
         return;
     }
 
-    let i: number, j: number;
-    var k, other;
-
     if (realTypeOf(lhs) === 'date'
         && ((lhs as Date).valueOf() - (rhs as Date).valueOf()) !== 0) {
         changes.push({
@@ -236,6 +231,8 @@ function deepDiff<LHS, RHS = LHS>(
             rhs
         } as DiffEdit<LHS, RHS>); new Date()
     } else if (ltype === 'object' && lhs !== null && rhs !== null) {
+        let i: number, j: number;
+        let other = false;
         for (i = stack.length - 1; i > -1; --i) {
             if (stack[i].lhs === lhs) {
                 other = true;
@@ -277,22 +274,20 @@ function deepDiff<LHS, RHS = LHS>(
                     deepDiff(lhs[i], rhs[i], changes, prefilter, currentPath, i, stack, orderIndependent);
                 }
             } else {
-                // let k: FieldKey;
-                // let other: number;
                 const akeys = [...Object.keys(lhs), ...Object.getOwnPropertySymbols(lhs)];
                 const pkeys = [...Object.keys(rhs), ...Object.getOwnPropertySymbols(rhs)];
                 for (i = 0; i < akeys.length; ++i) {
-                    k = akeys[i];
-                    other = pkeys.indexOf(k);
-                    if (other >= 0) {
+                    const k = akeys[i];
+                    const ki = pkeys.indexOf(k);
+                    if (ki >= 0) {
                         deepDiff(lhs[k], rhs[k], changes, prefilter, currentPath, k, stack, orderIndependent);
-                        pkeys[other] = null;
+                        pkeys[ki] = null;
                     } else {
                         deepDiff(lhs[k], undefined, changes, prefilter, currentPath, k, stack, orderIndependent);
                     }
                 }
                 for (i = 0; i < pkeys.length; ++i) {
-                    k = pkeys[i];
+                    const k = pkeys[i];
                     if (k) {
                         deepDiff(undefined, rhs[k], changes, prefilter, currentPath, k, stack, orderIndependent);
                     }
@@ -509,14 +504,23 @@ function revertArrayChange<LHS>(
 
 function arrayRemove(
     arr: any[],
-    from: number,
-    to?: number
+    index: number,
 ): any[] {
-    const rest = arr.slice((to || from) + 1 || arr.length);
-    arr.length = from < 0 ? arr.length + from : from;
-    arr.push.apply(arr, rest);
+    index = index < 0 ? arr.length + index : index;
+    arr.splice(index, 1);
     return arr;
 }
+
+// function arrayRemove(
+//     arr: any[],
+//     from: number,
+//     to?: number
+// ): any[] {
+//     const rest = arr.slice((to || from) + 1 || arr.length);
+//     arr.length = from < 0 ? arr.length + from : from;
+//     arr.push.apply(arr, rest);
+//     return arr;
+// }
 
 function realTypeOf(val: any): string {
     const type = typeof val;
@@ -547,20 +551,21 @@ function getOrderIndependentHash(val: any): number {
             // Addition is commutative so this is order indep
             accum += getOrderIndependentHash(item);
         });
-        const arrayString = '[type: array, hash: ' + accum + ']';
+        const arrayString = `[type: array, hash: ${accum}]`;
         return accum + hashThisString(arrayString);
     }
     if (type === 'object') {
         for (let key in val) {
             if (val.hasOwnProperty(key)) {
-                const keyValueString = '[ type: object, key: ' + key + ', value hash: ' + getOrderIndependentHash(val[key]) + ']';
+                const keyValueHash = getOrderIndependentHash(val[key]);
+                const keyValueString = `[ type: object, key: ${key}, value hash: ${keyValueHash}]`;
                 accum += hashThisString(keyValueString);
             }
         }
         return accum;
     }
     // Non object, non array...should be good?
-    const stringToHash = '[ type: ' + type + ' ; value: ' + val + ']';
+    const stringToHash = `[ type: ${type} ; value: ${val}]`;
     return accum + hashThisString(stringToHash);
 }
 
