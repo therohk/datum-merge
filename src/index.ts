@@ -7,7 +7,7 @@ export { deepDiffFlat } from "./diff-high";
 export { deepDiffTyped } from "./diff-high";
 
 export { UpdateCode } from "./merge-low";
-export { updateCodeInfo } from "./merge-low";
+export { updateCodeInfo } from "./merge-high";
 export { MergeError } from "./merge-high";
 
 export { shallowMerge, immutableMerge } from "./merge-high";

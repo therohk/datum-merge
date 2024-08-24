@@ -1,4 +1,4 @@
-import { emptyObject, isVectorArray } from "./type-utils";
+import { emptyObject, isString, isVectorArray } from "./type-utils";
 import { deepClone, getObjectKeys } from "./data-utils";
 import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { deepDiffTyped } from "./diff-high";
@@ -25,6 +25,37 @@ export class MergeError extends Error {
         super(data.e);
         this.name = data.n ?? 'MergeError';
     }
+}
+
+export function updateCodeInfo(
+    mergeCode: UpdateCode
+): {
+    insert?: boolean,
+    update?: boolean,
+    unset?: boolean,
+    enable: boolean,
+} {
+    if (!isString(mergeCode)) {
+        return { enable: false };
+    }
+    const allowUnset = [
+        UpdateCode.Y, UpdateCode.D, UpdateCode.U,
+        UpdateCode.XR, UpdateCode.XD, UpdateCode.XI]
+        .includes(mergeCode);
+    const allowInsert = [
+        UpdateCode.Y, UpdateCode.I, UpdateCode.B,
+        UpdateCode.XR, UpdateCode.XM, UpdateCode.XS, UpdateCode.XF]
+        .includes(mergeCode);
+    const allowUpdate = [
+        UpdateCode.Y, UpdateCode.H, UpdateCode.U, UpdateCode.B]
+        .includes(mergeCode)
+        || mergeCode.startsWith("X");
+    return {
+        insert: allowInsert,
+        update: allowUpdate,
+        unset: allowUnset,
+        enable: allowInsert || allowUpdate || allowUnset,
+    };
 }
 
 //-----------------------------------------------------------------------------
@@ -54,7 +85,6 @@ export function detailMerge(
 }
 
 //-----------------------------------------------------------------------------
-
 
 /**
  * merges every top-level key present in source

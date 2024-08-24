@@ -21,35 +21,7 @@ export enum UpdateCode {
     XI = "XI", //set intersection, delete missing values
     XS = "XS", //preserve order insert (allows dupes)
     XF = "XF", //insert from start (allows dupes)
-}
-
-export function updateCodeInfo(
-    mergeCode: UpdateCode
-): {
-    insert: boolean,
-    update: boolean,
-    unset: boolean,
-    enable: boolean,
-} {
-    const allowUnset = [
-        UpdateCode.Y, UpdateCode.D, UpdateCode.U,
-        UpdateCode.XR, UpdateCode.XD, UpdateCode.XI]
-        .includes(mergeCode);
-    const allowInsert = [
-        UpdateCode.Y, UpdateCode.I, UpdateCode.B,
-        UpdateCode.XR, UpdateCode.XM, UpdateCode.XS, UpdateCode.XF]
-        .includes(mergeCode);
-    const allowUpdate = [
-        UpdateCode.Y, UpdateCode.H, UpdateCode.U, UpdateCode.B]
-        .includes(mergeCode)
-        || mergeCode.startsWith("X");
-    return {
-        insert: allowInsert,
-        update: allowUpdate,
-        unset: allowUnset,
-        enable: allowInsert || allowUpdate || allowUnset,
-    };
-}
+};
 
 export function mergeScalarField(
     target: any,
@@ -144,21 +116,14 @@ export function mergeVectorField(
         case UpdateCode.XR:
             target[label] = deepClone(sourceVals);
             return true;
+        // case UpdateCode.C:
         case UpdateCode.XS:
-            if (!targetHas)
-                target[label] = [];
-            target[label].push(...sourceVals);
-            return true;
-        // targetVals = concat(target[label] ?? [], sourceVals);
-        // break;
+            targetVals = concat(target[label] ?? [], sourceVals);
+            break;
         case UpdateCode.XF:
             //entire array appears in diff
-            if (!targetHas)
-                target[label] = [];
-            target[label].unshift(...sourceVals);
-            return true;
-        // targetVals = concat(sourceVals, target[label] ?? []);
-        // break;
+            targetVals = concat(sourceVals, target[label] ?? []);
+            break;
         case UpdateCode.B:
         case UpdateCode.XM:
             targetVals = unionWith(target[label], sourceVals, isEqual);
@@ -183,5 +148,5 @@ export function mergeVectorField(
     //always clone source objects?
     target[label] = targetVals; //array replaced
     // set(target, label, targetVals);
-    return changed; //was always true
-}
+    return changed;
+};
