@@ -1,7 +1,7 @@
 // import { get, has, set, unset } from "lodash-es";
 import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lodash-es";
 import { isArrayOfAny, isNullish } from "./type-utils";
-import { areArraysEqual, deepClone } from "./data-utils";
+import { areArraysEqual, deepClone } from "./datum-utils";
 
 export enum UpdateCode {
     T = "T", //touch, blank update

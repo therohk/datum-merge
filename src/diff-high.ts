@@ -1,10 +1,11 @@
 import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff";
-import { flattenObject, getObjectKeys } from "./data-utils";
+// import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff"; //todo
+import { flattenObject, getObjectKeys } from "./datum-utils";
 
 export function deepDiffFlat(
     oldFlat: any, //source
     newFlat: any, //target
-    flatten = false,
+    flatten: boolean = false,
 ): [any, any] {
     if (flatten) {
         oldFlat = flattenObject(oldFlat);
@@ -51,7 +52,7 @@ export function deepDiffLow<T, S>(
     lhsObj: T,
     rhsObj: S,
     orderInd: boolean = false,
-): Diff<T, S>[] | false {
+): readonly Diff<T, S>[] | false {
     const differences = !orderInd
         ? diff(lhsObj, rhsObj)
         : orderIndependentDiff(lhsObj, rhsObj);

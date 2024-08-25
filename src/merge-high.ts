@@ -1,5 +1,5 @@
 import { emptyObject, isString, isVectorArray } from "./type-utils";
-import { deepClone, getObjectKeys } from "./data-utils";
+import { deepClone, getObjectKeys } from "./datum-utils";
 import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { deepDiffTyped } from "./diff-high";
 

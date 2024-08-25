@@ -1,4 +1,6 @@
 import { emptyObject, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, isVectorArray } from "../src/type-utils";
+import { deepClone, flattenObject, unflattenObject } from "../src/datum-utils";
+import { deepDiffFlat } from "../src/diff-high";
 
 describe("validate-utils", () => {
 
@@ -42,6 +44,28 @@ describe("validate-utils", () => {
         expect(isArrayOfSame([2, 2])).toBe("number");
         expect(isArrayOfSame([{ a: "a" }, { b: "b" }])).toBe("object");
 
+    });
+
+    test('should flatten and unflatten object', async () => {
+
+        const one = { same: "val", arr: ["1", "2", "5"], simp: "was", remove: "me", change: ["woof"], deep: { x: "1", y: "2", a: [5, 6] } };
+        const two = { same: "val", arr: ["1", "56", "2", "4"], simp: "now", insert: "this", change: ["oink"], deep: { z: "3", y: "4" } };
+        const oneBkp = deepClone(one);
+        const twoBkp = deepClone(two);
+
+        const flatOne = flattenObject(one);
+        const flatTwo = flattenObject(two);
+        // console.log("flat", flatObj);
+        expect(one).toMatchObject(unflattenObject(flatOne));
+        expect(two).toMatchObject(unflattenObject(flatTwo));
+
+        const [updated, removed] = deepDiffFlat(two, one, true);
+        expect(updated).toBeDefined();
+        expect(removed).toBeDefined();
+        // console.log("fdiff", { updated, removed });
+
+        expect(one).toEqual(oneBkp);
+        expect(two).toEqual(twoBkp);
     });
 
 });

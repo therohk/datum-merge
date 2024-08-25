@@ -4,7 +4,7 @@ import equal from 'fast-deep-equal';
 export function getObjectKeys(
     obj: any,
     excludeKeys?: string[],
-    includeKeys?: string[], //for delete
+    includeKeys?: string[],
 ): string[] {
     if (!obj) {
         return [];
@@ -48,6 +48,35 @@ export function toUniqueArray<T>(arr: T[]): T[] {
     return [...new Set<T>(arr)];
 }
 
+export function containsAny<T>(
+    needles: T[],
+    haystack: T[],
+): boolean {
+    if (!needles?.length || !haystack?.length) {
+        return false;
+    }
+    return needles.some((i) => haystack.includes(i));
+}
+
+export function containsAll<T>(
+    needles: T[],
+    haystack: T[],
+): boolean {
+    if (!needles?.length || !haystack?.length) {
+        return false;
+    }
+    return needles.every((i) => haystack.includes(i));
+}
+
+function arrayStartsWith<T>(arr: T[], base: T[]): boolean {
+    for (let i = 0; i < base.length; i++) {
+        if (arr[i] !== base[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export function areArraysEqual<T>(
     arr1: T[] | undefined,
     arr2: T[] | undefined,
@@ -66,10 +95,45 @@ export function areArraysEqual<T>(
     return true;
 }
 
+function deleteEmptyKeys(obj: any): void {
+    //modifies passed obj in place
+    //removes empty properties and empty arrays
+    return Object.keys(obj).forEach((k) => {
+        if (!obj[k] || obj[k] === undefined
+            || (Array.isArray(obj[k]) && obj[k].length === 0)) {
+            delete obj[k];
+        }
+    });
+}
+
 //-----------------------------------------------------------------------------
 
-export function flattenObject(obj: any): any {
-    const flatten: { [key: string]: any } = {};
+function selectKeys(
+    obj: any,
+    excludeKeys: string[]
+): any {
+    //creates new object
+    return Object.fromEntries(
+        Object.entries(obj)
+            .filter(([k, _]) => !excludeKeys.includes(k))
+    );
+}
+
+// function clonePartial<T>(obj: T, fields?: string[]): Partial<T> {
+//     if (!obj) {
+//         return obj;
+//     }
+//     fields = fields || Object.keys(obj);
+//     return fields.reduce((clone, field) => {
+//         clone[field] = deepClone(obj[field]);
+//         return clone;
+//     }, {} as Partial<T>);
+// }
+
+export function flattenObject(
+    obj: { [key:string]: any }
+): { [key:string]: any } {
+    const flatten: { [key:string]: any } = {};
     const path: any[] = [];
     const isObject = (value: any) => Object(value) === value;
     function dig(obj: any) {
@@ -87,8 +151,10 @@ export function flattenObject(obj: any): any {
     return flatten;
 }
 
-export function unflattenObject(flatObj: any): any {
-    const unFlatten: any = {};
+export function unflattenObject(
+    flatObj: { [key:string]: any }
+): { [key:string]: any } {
+    const unFlatten: { [key:string]: any } = {};
     for (const [path, value] of Object.entries(flatObj)) {
         const chain = path.split('.');
         let object = unFlatten;

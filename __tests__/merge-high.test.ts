@@ -1,4 +1,4 @@
-import { deepClone } from "../src/data-utils";
+import { deepClone } from "../src/datum-utils";
 import { UpdateCode } from "../src/merge-low";
 import { immutableMerge } from "../src/merge-high";
 
@@ -38,6 +38,10 @@ describe("validate-merge-utils", () => {
         // console.log("ord n", deepDiffLow(lhs, rhs));
         // console.log("ord y", deepDiffLow(lhs, rhs, true));
         // console.log("m", { t: lhs, s: rhs });
+
+        expect(immutableMerge(lhs, lhs, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
+        expect(immutableMerge(lhs, {}, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
+        expect(immutableMerge({}, lhs, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
 
         //vector set operations
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XM).a).toEqual(["11", "22", "33", "44"]);

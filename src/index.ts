@@ -1,6 +1,6 @@
 
-export { deepEquals } from "./data-utils";
-export { flattenObject, unflattenObject } from "./data-utils";
+export { deepEquals } from "./datum-utils";
+export { flattenObject, unflattenObject } from "./datum-utils";
 
 export { deepDiffLow } from "./diff-high";
 export { deepDiffFlat } from "./diff-high";
@@ -16,4 +16,4 @@ export { diffFromMerge } from "./merge-high";
 
 //defaults
 export { shallowMerge as merge } from "./merge-high";
-export { deepDiffTyped as diff } from "./diff-high";
+export { deepDiffLow as diff } from "./diff-high";
