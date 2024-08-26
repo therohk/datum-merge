@@ -24,21 +24,11 @@ Code contributions are welcome via issues and pull requests.
 
 ---
 
-## Examples
+## Sample Usage
 
 ```
-import { merge, MergeConfig, UpdateCode } from "datum-merge";
-const conf: MergeConfig = {
-    "id": UpdateCode.I,
-    "field1": UpdateCode.B,
-    "arr*": UpdateCode.XM,
-    nested: UpdatedCode.N,
-    "obj1": {
-        scalar: UpdateCode.B,
-        vector: UpdateCode.XM,
-    },
-};
-const diff = merge(target, source, conf);
+import { merge, detailMerge, MergeConfig, UpdateCode } from "datum-merge";
+const diff = merge(target, source, UpdateCode.B, UpdateCode.XM);
 ```
 
 ## Merge Strategy
@@ -51,12 +41,12 @@ It decides whether a change to the value of the field is allowed during a merge 
 The same field within a source and target object is represented by `s` and `t` respectively.
 Whether the strategy requires data to be present for the field, is shown by { 0=no, 1=yes, X=irrelavant }. 
 The value of the source field is migrated to the target field only if the predicate passes.
-See the implementation of this logic in [merge-low.ts](src/merge-low.ts).
 
 | Code Value | Predicate | Meaning |
 |----|----|----|
 | C | n/a | always create new instance |
-| N | `0` | reject any change, skip merge |
+| T | n/a | touch datum ; empty merge |
+| N | `0` | reject any change ; skip merge |
 | Y | `sX & tX` | accept any change ; bypass merge |
 | B | `s1 & tX` | insert or update, no delete |
 | H | `s1 & t1` | update only if exists |
@@ -78,5 +68,7 @@ Applying the merge results in one of these transitions per primitive value in th
 | N | new / insert   | `null <- non-null` |
 | E | edit / update  | `non-null <- non-null` |
 | D | unset / delete | `non-null <- null` |
+| AN | array size increase | `non-null > non-null` |
+| AD | array size decrease | `non-null < non-null` |
 
 ---
