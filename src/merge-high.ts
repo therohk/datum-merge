@@ -1,7 +1,7 @@
-import { emptyObject, isString, isVectorArray } from "./type-utils";
+import { emptyObject, isObject, isString, isVectorArray } from "./type-utils";
 import { deepClone, getObjectKeys } from "./datum-utils";
-import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { deepDiffTyped } from "./diff-high";
+import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 
 export type MergeTypes = string[] | number[] | string | number | boolean;
 // export type MergeTypes = Primitive | VectorArray;
@@ -9,8 +9,8 @@ export type MergeSafeTuple = { [label: string]: MergeTypes };
 export type MergeTuple = { [label: string]: any };
 export type MergeCode = `${UpdateCode}`;
 
-export type DetailConfig = { 
-    [path: string]: UpdateCode; 
+export type DetailConfig = {
+    [path: string]: UpdateCode | DetailConfig;
 };
 
 export class MergeError extends Error {
@@ -61,8 +61,9 @@ export function updateCodeInfo(
 //-----------------------------------------------------------------------------
 
 /**
- * merges every path present in given config
- * C, T not supported here 
+ * merges every key present in given config
+ * recursive call if nested config is present
+ * C, T not supported here
  * @returns if target was changed
  */
 export function detailMerge(
@@ -70,10 +71,22 @@ export function detailMerge(
     source: { [key: string]: any },
     mergeCodes: DetailConfig,
 ): boolean {
-    const mergeKeys = getObjectKeys(mergeCodes);
+    if (!isObject(mergeCodes) || emptyObject(mergeCodes)) {
+        return false;
+    }
     let changed = false;
+    const mergeKeys = getObjectKeys(mergeCodes);
     for (const label of mergeKeys) {
         const mergeCode = mergeCodes[label]!;
+        if (!isString(mergeCode)) {
+            if ((isObject(target[label]) && isObject(source[label]))
+                ? detailMerge(target[label], source[label], mergeCode)
+                : mergeScalarField(target, source, label, UpdateCode.I)
+            ) {
+                changed = true;
+            }
+            continue;
+        }
         if (mergeCode.toString().startsWith("X")
             ? mergeVectorField(target, source, label, mergeCode)
             : mergeScalarField(target, source, label, mergeCode)
@@ -82,6 +95,20 @@ export function detailMerge(
         }
     }
     return changed;
+}
+
+/**
+ * detail merge but into a clone of target
+ * @returns new object with merged result
+ */
+export function immutableDetailMerge(
+    target: any,
+    source: any,
+    mergeCodes: DetailConfig,
+): any {
+    const targetCopy = deepClone(target);
+    detailMerge(targetCopy, source, mergeCodes);
+    return targetCopy;
 }
 
 //-----------------------------------------------------------------------------

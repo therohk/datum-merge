@@ -1,6 +1,6 @@
 import { deepClone } from "../src/datum-utils";
 import { UpdateCode } from "../src/merge-low";
-import { immutableMerge } from "../src/merge-high";
+import { DetailConfig, immutableDetailMerge, immutableMerge } from "../src/merge-high";
 
 describe("validate-merge-utils", () => {
 
@@ -16,7 +16,7 @@ describe("validate-merge-utils", () => {
         expect(immutableMerge(lhsS, rhsS, UpdateCode.I)).toEqual({ x: "s", y: "t", z: "t" });
         expect(immutableMerge(lhsS, rhsS, UpdateCode.Y)).toEqual({ x: "s", y: "t", z: "s" });
         expect(immutableMerge(lhsS, rhsS, UpdateCode.N)).toEqual(lhsS);
-        
+
         //scalar unset
         lhsS['d'] = "t";
         rhsS['d'] = undefined;
@@ -34,10 +34,6 @@ describe("validate-merge-utils", () => {
         const rhs = { a: ["33", "22", "44"], tv: "s", sv: ["11", "22", "11"], ss: "ss" };
         const lhsCopy = deepClone(lhs);
         const rhsCopy = deepClone(rhs);
-
-        // console.log("ord n", deepDiffLow(lhs, rhs));
-        // console.log("ord y", deepDiffLow(lhs, rhs, true));
-        // console.log("m", { t: lhs, s: rhs });
 
         expect(immutableMerge(lhs, lhs, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
         expect(immutableMerge(lhs, {}, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
@@ -75,4 +71,32 @@ describe("validate-merge-utils", () => {
         expect(rhsCopy).toMatchObject(rhs);
 
     });
+
+    test('should detail merge fields with exact config', async () => {
+
+        const deepT = { oa: [{ x: "a" }, { c: "z" }, { b: "b" }], o: { z: ["a", "b"] }, del: "x" };
+        const deepS = { oa: [{ y: "b" }, { b: "b" }], o: { z: ["c"] }, del: null };
+
+        const nCodes: DetailConfig = { oa: UpdateCode.N, o: UpdateCode.N, del: UpdateCode.N };
+        const yCodes: DetailConfig = { oa: UpdateCode.Y, o: UpdateCode.Y, del: UpdateCode.Y };
+        const mCodes: DetailConfig = { oa: UpdateCode.XM, o: UpdateCode.B, del: UpdateCode.D };
+        const oCodes: DetailConfig = { oa: UpdateCode.XI, o: { z: UpdateCode.XF } };
+
+        expect(immutableDetailMerge(deepT, deepS, nCodes)).toMatchObject(deepT);
+        expect(immutableDetailMerge(deepT, deepS, {})).toMatchObject(deepT);
+        expect(immutableDetailMerge(deepT, deepS, yCodes)).toMatchObject(deepS);
+        expect(immutableDetailMerge(deepT, deepT, yCodes)).toMatchObject(deepT);
+
+        const mDeepT = immutableDetailMerge(deepT, deepS, mCodes);
+        expect(mDeepT.oa.length).toBe(4);
+        expect(mDeepT.o).toMatchObject(deepS.o);
+        expect(mDeepT.del).not.toBeDefined();
+
+        const oDeepT = immutableDetailMerge(deepT, deepS, oCodes);
+        expect(oDeepT.oa).toMatchObject([{ b: "b" }]);
+        expect(oDeepT.o).toMatchObject({ z: ["c", "a", "b"] });
+        expect(oDeepT.del).toBeDefined();
+
+    });
+
 });

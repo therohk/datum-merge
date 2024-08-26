@@ -11,8 +11,9 @@ export { updateCodeInfo } from "./merge-high";
 export { MergeError } from "./merge-high";
 
 export { shallowMerge, immutableMerge } from "./merge-high";
-export { type DetailConfig, detailMerge } from "./merge-high";
 export { diffFromMerge } from "./merge-high";
+export { type DetailConfig, } from "./merge-high";
+export { detailMerge, immutableDetailMerge } from "./merge-high";
 
 //defaults
 export { shallowMerge as merge } from "./merge-high";
