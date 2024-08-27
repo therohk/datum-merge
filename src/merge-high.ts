@@ -1,4 +1,4 @@
-import { isArrayOfAny, emptyObject, isString } from "./type-utils";
+import { isArrayOfAny, emptyObject, isObject, isString } from "./type-utils";
 import { deepClone, getObjectKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
@@ -120,3 +120,75 @@ export function diffFromMerge(
     const delta = deepDiffTyped(target, targetCopy);
     return emptyObject(delta) ? false : delta;
 }
+
+//-----------------------------------------------------------------------------
+
+/**
+ * recursively merges any unstructured datum
+ * nesting can be disabled or treated as scalar
+ * C, T not supported here
+ * @returns if target was changed
+ */
+export function deepMerge(
+    target: { [key: string]: any },
+    source: { [key: string]: any },
+    scalarCode: UpdateCode,
+    vectorCode: UpdateCode,
+    nestedCode: UpdateCode,
+): boolean {
+    const sourceKeys = getObjectKeys(source);
+    if (!sourceKeys?.length) {
+        return false;
+    }
+    let changed = false;
+    for (const label of sourceKeys) {
+        if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
+            if (mergeVectorField(target, source, label, vectorCode)) {
+                changed = true;
+            }
+            continue;
+        }
+        //recursive call for objects
+        if (isObject(target[label]) && isObject(source[label])) {
+            if (nestedCode === UpdateCode.N)
+                continue;
+            if (nestedCode === UpdateCode.Y) {
+                if (mergeScalarField(target, source, label, scalarCode))
+                    changed = true;
+                continue;
+            }
+            if (deepMerge(target[label], source[label],
+                nestedCode.startsWith("X") ? scalarCode : nestedCode,
+                nestedCode.startsWith("X") ? nestedCode : vectorCode,
+                nestedCode
+            )) {
+                changed = true;
+            }
+            continue;
+        }
+        if (mergeScalarField(target, source, label, scalarCode)) {
+            changed = true;
+        }
+    }
+    return changed;
+}
+
+/**
+ * deep merge but into a clone of target
+ * @returns new object with merged result
+ */
+export function immutableDeepMerge(
+    target: { [key: string]: any },
+    source: { [key: string]: any },
+    scalarCode: UpdateCode,
+    vectorCode?: UpdateCode,
+    nestedCode?: UpdateCode,
+): any {
+    const targetCopy = deepClone(target);
+    deepMerge(targetCopy, source,
+        scalarCode,
+        vectorCode ?? scalarCode,
+        nestedCode ?? scalarCode,
+    );
+    return targetCopy;
+};

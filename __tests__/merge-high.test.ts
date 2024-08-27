@@ -1,6 +1,6 @@
 import { deepClone } from "../src/datum-utils";
 import { UpdateCode } from "../src/merge-low";
-import { immutableMerge } from "../src/merge-high";
+import { immutableDeepMerge, immutableMerge } from "../src/merge-high";
 
 describe("validate-merge-utils", () => {
 
@@ -69,6 +69,39 @@ describe("validate-merge-utils", () => {
         //no side effects
         expect(lhsCopy).toMatchObject(lhs);
         expect(rhsCopy).toMatchObject(rhs);
+
+    });
+
+    test('should merge nested fields with update code', async () => {
+
+        const sc = UpdateCode.B;
+        const vc = UpdateCode.XM;
+        const lhs = { o: { a: ["11", "22", "33"], b: "t", k: "t" }, ox: { n: 1 }, tv: ["t"], ts: "ts" };
+        const rhs = { o: { a: ["33", "22", "44"], b: "s" }, ox: { m: "z" }, tv: ["s"], ss: "ss" };
+
+        //fallback to scalar
+        expect(immutableMerge(lhs, rhs, sc, vc).o).toMatchObject(rhs.o);
+
+        //nested vector
+        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.N).o).toMatchObject(lhs.o);
+        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.Y).o).toMatchObject(rhs.o);
+        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.XM).o).toMatchObject({ a: ["11", "22", "33", "44"], b: "s", k: "t" });
+
+        //nested object array
+        const deepT = { oa: { v: [{ x: "a" }, { c: "z" }, { b: "v" }] }, o: { z: ["a", "b"], b: "t" }, del: "x" };
+        const deepS = { oa: { v: [{ y: "b" }, { b: "v" }] }, o: { z: ["c"], b: "s" } };
+
+        expect(immutableDeepMerge(deepS, deepS, sc, UpdateCode.XM, UpdateCode.N)).toMatchObject(deepS);
+        expect(immutableDeepMerge(deepT, deepS, UpdateCode.Y, UpdateCode.N, UpdateCode.XR)).toMatchObject(deepS);
+
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.XS, UpdateCode.N).oa.v.length).toBe(3);
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.XS, UpdateCode.Y).oa.v.length).toBe(2);
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.XM, UpdateCode.I).oa.v.length).toBe(4);
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.XS, UpdateCode.XS).oa.v.length).toBe(5);
+
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.N, UpdateCode.XI).oa.v.length).toBe(1);
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.N, UpdateCode.XD).oa.v.length).toBe(2);
+        expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.N, UpdateCode.XM).oa.v.length).toBe(4);
 
     });
 
