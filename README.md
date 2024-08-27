@@ -6,13 +6,13 @@
 
 **NPM library** : https://www.npmjs.com/package/datum-merge
 
-![](https://github.com/therohk/datum-merge/actions/workflows/build.yml/badge.svg)
+![](https://github.com/therohk/datum-merge/actions/workflows/build.yml/badge.svg) ![](https://img.shields.io/github/v/release/therohk/datum-merge)
 
 ---
 
 ## Upcoming Features
 
-1. inline entire [deep-diff](https://github.com/flitbit/diff) library which is unmaintained and contains serious bugs.
+1. inline the unmaintained [deep-diff](https://github.com/flitbit/diff) library which contains serious bugs. (available)
 
 2. support merging for top level arrays or primitives.
 
@@ -27,8 +27,18 @@ Code contributions are welcome via issues and pull requests.
 ## Sample Usage
 
 ```
-import { merge, detailMerge, MergeConfig, UpdateCode } from "datum-merge";
-const diff = merge(target, source, UpdateCode.B, UpdateCode.XM);
+import { merge, detailMerge, UpdateCode } from "datum-merge";
+
+//merges all fields
+let diff = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
+
+//merges only given fields
+diff = detailMerge(target, source, {
+    mykey: UpdateCode.I, 
+    myarr: UpdateCode.XM, 
+    anobj: UpdateCode.B,
+    myobj: { myid: UpdateCode.I },
+});
 ```
 
 ## Merge Strategy
@@ -64,10 +74,10 @@ Applying the merge results in one of these transitions per primitive value in th
 
 | Code Value | Meaning | Transitions |
 |----|----|----|
-| Z | noop / ignore  | `null <- null` or `non-null == non-null` |
-| N | new / insert   | `null <- non-null` |
-| E | edit / update  | `non-null <- non-null` |
-| D | unset / delete | `non-null <- null` |
+| Z | noop / ignore  | `null <-- null` or `non-null == non-null` |
+| N | new / insert   | `null <-- non-null` |
+| E | edit / update  | `non-null <-- non-null` |
+| D | unset / delete | `non-null <-- null` |
 | AN | array size increase | `non-null > non-null` |
 | AD | array size decrease | `non-null < non-null` |
 

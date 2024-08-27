@@ -19,6 +19,6 @@ export { type DetailConfig, } from "./merge-conf";
 export { detailMerge, immutableDetailMerge } from "./merge-conf";
 
 //defaults
-export { shallowMerge as merge } from "./merge-high";
+export { deepMerge as merge } from "./merge-high";
 export * from "./diff-lib/deep-diff";
 export { deepDiffLow as deepDiff } from "./diff-high";
