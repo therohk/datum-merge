@@ -44,7 +44,7 @@ export function isRegExp(value: any): value is RegExp {
     return value instanceof RegExp;
 }
 
-export function isObject(value: any): boolean {
+export function isObject(value: any): value is object {
     return typeof value === 'object'
         && !Array.isArray(value)
         && value !== null;

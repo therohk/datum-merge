@@ -1,6 +1,6 @@
-import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff";
-// import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff"; //todo
-import { deepClone, flattenObject, getObjectKeys } from "./datum-utils";
+import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff";
+// import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff"; //old library
+import { flattenObject, getObjectKeys } from "./datum-utils";
 
 export function deepDiffFlat(
     oldFlat: any, //source
@@ -55,10 +55,7 @@ export function deepDiffLow<T, S>(
 ): readonly Diff<T, S>[] | false {
     const differences = !orderInd
         ? diff(lhsObj, rhsObj)
-        : orderIndependentDiff(
-            deepClone(lhsObj),
-            deepClone(rhsObj),
-        ); //bug in library
+        : orderIndependentDiff(lhsObj, rhsObj);
     return !differences?.length
         ? false
         : differences;

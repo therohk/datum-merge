@@ -20,28 +20,13 @@ export function getObjectKeys(
     return sourceKeys;
 };
 
-export function createGlobRegex(
-    search: string
-): RegExp {
-    let pattern = search.replace(/\*/g, ".+");
-    //pattern = search.replace(/\?/g, ".");
-    return new RegExp(`^${pattern}$`);
-}
-
 export function deepEquals(lhs: any, rhs: any): boolean {
     return equal(lhs, rhs);
-}
-
-export function objToString(value: any): string {
-    return JSON.stringify(value, null, 1);
-    // return JSON.stringify(value);
 }
 
 export function deepClone(val: any): any {
     return cloneDeep(val);
 }
-
-//-----------------------------------------------------------------------------
 
 export function toUniqueArray<T>(arr: T[]): T[] {
     return [...new Set<T>(arr)];
@@ -63,6 +48,34 @@ export function areArraysEqual<T>(
         }
     }
     return true;
+}
+
+//-----------------------------------------------------------------------------
+
+export function createGlobRegex(
+    search: string
+): RegExp {
+    let pattern = search.replace(/\*/g, ".+");
+    //pattern = search.replace(/\?/g, ".");
+    return new RegExp(`^${pattern}$`);
+}
+
+export function selectGlobKeys(
+    obj: any,
+    includePats: string[] = ["*"], //globs or labels
+    excludeKeys?: string[],        //labels only
+): string[] {
+    const includeKeys: string[] = [];
+    if (!obj || !includePats?.length) {
+        return includeKeys;
+    }
+    const globPats = includePats.map((g) => createGlobRegex(g));
+    for (const label of getObjectKeys(obj, excludeKeys)) {
+        if (globPats.findIndex((r) => r.test(label)) >= 0) {
+            includeKeys.push(label);
+        }
+    }
+    return includeKeys;
 }
 
 //-----------------------------------------------------------------------------
@@ -94,16 +107,16 @@ export function unflattenObject(
     const unflatObj: { [key: string]: any } = {};
     for (const [path, value] of Object.entries(flatObj)) {
         const chain = path.split('.');
-        let object = unflatObj;
+        let obj = unflatObj;
         for (const [i, key] of chain.slice(0, -1).entries()) {
-            if (!object[key]) {
+            if (!obj[key]) {
                 const needArray = Number.isInteger(Number(chain[+i + 1]));
-                object[key] = needArray ? [] : {};
+                obj[key] = needArray ? [] : {};
             }
-            object = object[key];
+            obj = obj[key];
         }
         const lastkey = chain.pop();
-        object[lastkey!] = value;
+        obj[lastkey!] = value;
     }
     return unflatObj;
 }
