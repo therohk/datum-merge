@@ -31,6 +31,7 @@ describe("validate-utils", () => {
 
         //generic array
         expect(isArrayOfAny(undefined)).toBe(false);
+        expect(isArrayOfAny({})).toBe(false);
         expect(isArrayOfAny([])).toBe(true);
         expect(isArrayOfAny(["2", 2, false])).toBe(true);
 

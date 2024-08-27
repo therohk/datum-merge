@@ -1,16 +1,18 @@
-import { emptyObject, isObject, isString, isVectorArray } from "./type-utils";
+import { isArrayOfAny, emptyObject, isString } from "./type-utils";
 import { deepClone, getObjectKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 
 export type MergeTypes = string[] | number[] | string | number | boolean;
-// export type MergeTypes = Primitive | VectorArray;
 export type MergeSafeTuple = { [label: string]: MergeTypes };
 export type MergeTuple = { [label: string]: any };
 export type MergeCode = `${UpdateCode}`;
 
-export type DetailConfig = {
-    [path: string]: UpdateCode | DetailConfig;
+export type MergePerms = {
+    enable: boolean;
+    insert?: boolean;
+    update?: boolean;
+    unset?: boolean;
 };
 
 export class MergeError extends Error {
@@ -28,87 +30,30 @@ export class MergeError extends Error {
 }
 
 export function updateCodeInfo(
-    mergeCode: UpdateCode
-): {
-    insert?: boolean,
-    update?: boolean,
-    unset?: boolean,
-    enable: boolean,
-} {
+    mergeCode: UpdateCode | MergeCode,
+): MergePerms {
     if (!isString(mergeCode)) {
         return { enable: false };
     }
-    const allowUnset = [
+    const allowUnset = ([
         UpdateCode.Y, UpdateCode.D, UpdateCode.U,
-        UpdateCode.XR, UpdateCode.XD, UpdateCode.XI]
-        .includes(mergeCode);
-    const allowInsert = [
+        UpdateCode.XR, UpdateCode.XD, UpdateCode.XI] as string[]
+    ).includes(mergeCode);
+    const allowInsert = ([
         UpdateCode.Y, UpdateCode.I, UpdateCode.B,
-        UpdateCode.XR, UpdateCode.XM, UpdateCode.XS, UpdateCode.XF]
-        .includes(mergeCode);
-    const allowUpdate = [
-        UpdateCode.Y, UpdateCode.H, UpdateCode.U, UpdateCode.B]
-        .includes(mergeCode)
-        || mergeCode.startsWith("X");
+        UpdateCode.XR, UpdateCode.XM, UpdateCode.XS, UpdateCode.XF] as string[]
+    ).includes(mergeCode);
+    const allowUpdate = ([
+        UpdateCode.Y, UpdateCode.H, UpdateCode.U, UpdateCode.B,
+        UpdateCode.XR, UpdateCode.XS, UpdateCode.XF,
+        UpdateCode.XM, UpdateCode.XI, UpdateCode.XD] as string[]
+    ).includes(mergeCode);
     return {
         insert: allowInsert,
         update: allowUpdate,
         unset: allowUnset,
         enable: allowInsert || allowUpdate || allowUnset,
     };
-}
-
-//-----------------------------------------------------------------------------
-
-/**
- * merges every key present in given config
- * recursive call if nested config is present
- * C, T not supported here
- * @returns if target was changed
- */
-export function detailMerge(
-    target: { [key: string]: any },
-    source: { [key: string]: any },
-    mergeCodes: DetailConfig,
-): boolean {
-    if (!isObject(mergeCodes) || emptyObject(mergeCodes)) {
-        return false;
-    }
-    let changed = false;
-    const mergeKeys = getObjectKeys(mergeCodes);
-    for (const label of mergeKeys) {
-        const mergeCode = mergeCodes[label]!;
-        if (!isString(mergeCode)) {
-            if ((isObject(target[label]) && isObject(source[label]))
-                ? detailMerge(target[label], source[label], mergeCode)
-                : mergeScalarField(target, source, label, UpdateCode.I)
-            ) {
-                changed = true;
-            }
-            continue;
-        }
-        if (mergeCode.toString().startsWith("X")
-            ? mergeVectorField(target, source, label, mergeCode)
-            : mergeScalarField(target, source, label, mergeCode)
-        ) {
-            changed = true;
-        }
-    }
-    return changed;
-}
-
-/**
- * detail merge but into a clone of target
- * @returns new object with merged result
- */
-export function immutableDetailMerge(
-    target: any,
-    source: any,
-    mergeCodes: DetailConfig,
-): any {
-    const targetCopy = deepClone(target);
-    detailMerge(targetCopy, source, mergeCodes);
-    return targetCopy;
 }
 
 //-----------------------------------------------------------------------------
@@ -132,9 +77,8 @@ export function shallowMerge(
     }
     let changed = false;
     for (const label of sourceKeys) {
-        // if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
-        if (isVectorArray(target[label]) || isVectorArray(source[label])) {
-            //fails if target is not array
+        if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
+            //todo fails if target is not array
             if (mergeVectorField(target, source, label, vectorCode ?? scalarCode)) {
                 changed = true;
             }
