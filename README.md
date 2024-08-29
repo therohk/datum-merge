@@ -16,9 +16,11 @@
 
 2. support merging for top level arrays or primitives.
 
-3. project should compile in strict mode.
+3. option to throw error if field datatype changes during merge.
 
-4. formalize support for deeply nested objects (for v1).
+4. project should compile in strict mode.
+
+5. formalize config schema for deeply nested objects (for v1).
 
 Code contributions are welcome via issues and pull requests.
 
@@ -26,19 +28,33 @@ Code contributions are welcome via issues and pull requests.
 
 ## Sample Usage
 
+Merge with default or exact deep config:
 ```
 import { merge, detailMerge, UpdateCode } from "datum-merge";
-
-//merges all fields
-let diff = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
-
-//merges only given fields
-diff = detailMerge(target, source, {
+let changed = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
+changed = detailMerge(target, source, {
     mykey: UpdateCode.I, 
     myarr: UpdateCode.XM, 
     anobj: UpdateCode.B,
     myobj: { myid: UpdateCode.I },
 });
+```
+
+Deep merge with generic config patterns:
+```
+import { customMerge, MergeConfig, UpdateCode } from "datum-merge";
+const conf: MergeConfig = {
+    "*_id": UpdateCode.I,
+    scalar: UpdateCode.B,
+    field1: UpdateCode.D,
+    "arr*": UpdateCode.XM,
+    nested: UpdatedCode.N,
+    obj1: {
+        scalar: UpdateCode.B,
+        vector: UpdateCode.XM,
+    },
+};
+let diff = customMerge(target, source, conf);
 ```
 
 ## Merge Strategy
