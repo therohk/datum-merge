@@ -1,6 +1,6 @@
 {
 	"name": "datum-merge",
-	"version": "0.9.0",
+	"version": "0.5.4",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"repository": {
 		"type": "git",
@@ -9,8 +9,12 @@
 	"license": "MIT",
 	"description": "Simplified diff and merging for deeply nested objects.",
 	"keywords": ["merge", "diff", "compare", "patch", "update"],
-	"main": "dist/esm/index.js",
-	"types": "dist/esm/index.d.ts",
+	"main": "./dist/cjs/index.js",
+	"types": "./dist/cjs/index.d.ts",
+	"exports": {
+		"require": "./dist/cjs/index.js",
+		"import": "./dist/esm/index.js"
+	},
 	"files": [
 		"dist",
 		"src"
@@ -21,11 +25,11 @@
 	},
 	"scripts": {
 		"lint": "npx eslint src",
-		"pretty": "prettier -c src",
+		"pretty": "prettier -c ./src",
 		"scantask": "findstr /s /i todo src\\*.*",
 		"test": "jest",
-		"build:esm": "tsc",
-		"build:cjs": "tsc --module CommonJS --outDir dist/cjs",
+		"build:cjs": "tsc --outDir dist/cjs",
+		"build:esm": "tsc --module ESNext --outDir dist/esm",
 		"build": "run-s test build:*",
 		"compile": "tsc -noEmit -skipLibCheck",
 		"cyccheck": "dpdm --exit-code circular:1 --no-tree ./src"

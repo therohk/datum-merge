@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "./dist/esm",
-    "module": "ESNext",
+    "outDir": "./dist/cjs",
+    "module": "CommonJS",
     "target": "ES6",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -10,22 +10,20 @@
     // "inlineSources": true,
     "removeComments": true,
     "declaration": true,
+    "declarationMap": true,
     "allowJs": false,
     // "checkJs": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "importHelpers": true,
+    // "importHelpers": true,
+    // "downlevelIteration": true,
     // "isolatedModules": true,
     // "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "lib": [
-      "ES5",
-      "ES6",
-      "ES7"
-    ]
+    "lib": ["ES6"]
   },
   "include": [ "src/**/*.ts" ],
   "exclude": [ "**/*.test.ts" ],
