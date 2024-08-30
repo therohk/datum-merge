@@ -13,8 +13,8 @@ export function deepDiffFlat(
     }
     const updated = Object.assign({}, oldFlat);
     const removed = Object.assign({}, newFlat);
-    //delete the unUpdated keys
-    for (let key of Object.keys(newFlat)) {
+    //delete the unchanged keys
+    for (const key of Object.keys(newFlat)) {
         if (newFlat[key] === oldFlat[key]) {
             delete updated[key];
             delete removed[key];
@@ -24,10 +24,11 @@ export function deepDiffFlat(
 }
 
 export function deepDiffTyped<T>(
-    lhsObj: T,
-    rhsObj: T,
+    lhsObj: T, //target
+    rhsObj: T, //source
+    orderInd: boolean = false,
 ): Partial<T> {
-    const differences = deepDiffLow(lhsObj, rhsObj);
+    const differences = deepDiffLow(lhsObj, rhsObj, orderInd);
     const deltaObj: Partial<T> = {};
     if (!differences) {
         return deltaObj;

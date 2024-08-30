@@ -8,6 +8,10 @@ export type ObjectKeys<T> = keyof T;
 export type ObjectVals<T> = T[keyof T];
 export type Prettify<T> = { [K in keyof T]: T[K]; } & {};
 
+export type SafeTypes = Primitive | VectorArray;
+export type SafeTupleObj = { [label: string]: SafeTypes };
+export type TupleObj = { [label: string]: any };
+
 export function isString(value: any): value is string {
     return typeof value === 'string';
 }
@@ -38,10 +42,6 @@ export function integerString(str: string): boolean {
     return ((str != null)
         && (str !== '')
         && Number.isSafeInteger(Number(str.toString())));
-}
-
-export function isRegExp(value: any): value is RegExp {
-    return value instanceof RegExp;
 }
 
 export function isObject(value: any): value is object {

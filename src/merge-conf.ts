@@ -1,8 +1,8 @@
-import { isArrayOfAny, emptyObject, isNullish, isObject, isString } from "./type-utils";
+import { isArrayOfAny, emptyObject, isNullish, isObject, isString, TupleObj } from "./type-utils";
 import { createGlobRegex, deepClone, getObjectKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
-import { MergeTuple } from "./merge-high";
+import { updateCodeInfo } from "./merge-high";
 
 export type DetailConfig = {
     [key: string]: UpdateCode | DetailConfig;
@@ -12,7 +12,7 @@ export type MergeConfig = {
     scalar?: UpdateCode, //default
     vector?: UpdateCode, //array types
     nested?: UpdateCode, //object types 
-    [key: string]: UpdateCode | MergeConfig | undefined,
+    [glob: string]: UpdateCode | MergeConfig | undefined,
 };
 
 //-----------------------------------------------------------------------------
@@ -68,13 +68,35 @@ export function immutableDetailMerge(
     return targetCopy;
 }
 
+/**
+ * @returns list of mergeable keys for given config
+ */
+export function selectDetailKeys(
+    obj: any,
+    mergeCodes: DetailConfig,
+    excludeKeys?: string[],
+): string[] {
+    const includeKeys: string[] = [];
+    if (!obj || !mergeCodes) {
+        return includeKeys;
+    }
+    for (const label of getObjectKeys(obj, excludeKeys)) {
+        const labelConf = mergeCodes[label];
+        if (isString(labelConf) && updateCodeInfo(labelConf).enable)
+            includeKeys.push(label);
+        if (isObject(labelConf) && !emptyObject(labelConf))
+            includeKeys.push(label);
+    }
+    return includeKeys;
+}
+
 //-----------------------------------------------------------------------------
 
 /**
  * merge structured data and return diff
- * @returns diff or false
+ * @returns diff or false if no changes
  */
-export function customMerge<T extends MergeTuple>(
+export function customMerge<T extends TupleObj>(
     target: T,
     source: Partial<T>,
     mergeConf: MergeConfig | UpdateCode,
@@ -99,7 +121,7 @@ export function customMerge<T extends MergeTuple>(
     }
     const targetBkp: T = deepClone(target);
     const changed = detailMerge(target, source, mergeCodes);
-    const delta = deepDiffTyped<T>(targetBkp, target);
+    const delta = deepDiffTyped<T>(targetBkp, target, true);
     if (changed || !emptyObject(delta)) {
         return delta;
     }
