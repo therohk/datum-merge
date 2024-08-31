@@ -83,8 +83,8 @@ The value of the source field is migrated to the target field only if the predic
 | XM | `s ∪ t`   | set union, vector merge |
 | XD | `s - t`   | set difference, delete given values |
 | XI | `s ∩ t`   | set intersection, delete missing values |
-| XS | `s + t` | preserve order insert (allows dupes) |
-| XF | `t + s` | insert from start (allows dupes) |
+| XS | `t + s` | preserve order insert (allows dupes) |
+| XF | `s + t` | insert from start (allows dupes) |
 
 Applying the merge results in one of these transitions per primitive value in the target object.
 

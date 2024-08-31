@@ -9,16 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     node-version: [18.x, 20.x, 22.x]
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - name: setup-node
+      - name: setup-node ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
       - name: package-install
         run: npm install
