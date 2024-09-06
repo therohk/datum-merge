@@ -1,6 +1,6 @@
 import { emptyObject, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, isVectorArray } from "../src/type-utils";
-import { deepClone, flattenObject, unflattenObject } from "../src/datum-utils";
-import { deepDiffFlat } from "../src/diff-high";
+import { areArraysEqual, deepClone, deepEquals, flattenObject, unflattenObject } from "../src/datum-utils";
+import { deepDiffFlat, deepDiffTyped } from "../src/diff-high";
 
 describe("validate-utils", () => {
 
@@ -67,6 +67,23 @@ describe("validate-utils", () => {
 
         expect(one).toEqual(oneBkp);
         expect(two).toEqual(twoBkp);
+    });
+
+    test('objects match with deep equality checks', async () => {
+
+        const lhsO = { o: [{ a: 1 }, { b: 2 }], v: ["11", "22", "33"] };
+        const rhsO = { o: [{ a: 1 }, { b: 2 }], v: ["11", "22", "33"] };
+
+        expect(areArraysEqual(lhsO.v, rhsO.v)).toBeTruthy();
+        expect(areArraysEqual(lhsO.o, rhsO.o)).toBeFalsy();
+        expect(areArraysEqual(lhsO.o, lhsO.o)).toBeTruthy();
+
+        expect(deepEquals(lhsO.v, rhsO.v)).toBeTruthy();
+        expect(deepEquals(lhsO.o, rhsO.o)).toBeTruthy();
+
+        expect(deepDiffFlat(rhsO, lhsO, true)).toMatchObject([{}, {}]);
+        expect(deepDiffTyped<any>(lhsO, rhsO)).toEqual({});
+        expect(deepDiffTyped<any>(rhsO, lhsO)).toEqual({});
     });
 
 });

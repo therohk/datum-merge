@@ -3,31 +3,33 @@ import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lo
 import { isArrayOfAny, isNullish } from "./type-utils";
 import { areArraysEqual, deepClone } from "./datum-utils";
 
-export enum UpdateCode {
-    T = "T", //touch, blank update
-    C = "C", //create instance
+export const UpdateCode = {
+    T: "T", //touch, blank update
+    C: "C", //create instance
     // scalar/def codes
-    N = "N", //ignore change
-    Y = "Y", //accept any change
-    B = "B", //insert or update, no delete
-    U = "U", //update or delete only
-    H = "H", //update only if exists
-    I = "I", //insert only
-    D = "D", //delete only
+    N: "N", //ignore change
+    Y: "Y", //accept any change
+    B: "B", //insert or update, no delete
+    U: "U", //update or delete only
+    H: "H", //update only if exists
+    I: "I", //insert only
+    D: "D", //delete only
     // vector/xref codes
-    XR = "XR", //full replace
-    XM = "XM", //set union, vector merge
-    XD = "XD", //set difference, delete given values
-    XI = "XI", //set intersection, delete missing values
-    XS = "XS", //preserve order insert (allows dupes)
-    XF = "XF", //insert from start (allows dupes)
-};
+    XR: "XR", //full replace
+    XM: "XM", //set union, vector merge
+    XD: "XD", //set difference, delete given values
+    XI: "XI", //set intersection, delete missing values
+    XS: "XS", //preserve order insert (allows dupes)
+    XF: "XF", //insert from start (allows dupes)
+} as const;
+
+export type MergeCode = typeof UpdateCode[keyof typeof UpdateCode];
 
 export function mergeScalarField(
     target: any,
     source: any,
     label: string,
-    mergeCode: UpdateCode,
+    mergeCode: MergeCode,
 ): boolean {
     const sourceHas = !isNullish(source[label]);
     const targetHas = target.hasOwnProperty(label); //!isNullish(target[label]);
@@ -89,7 +91,7 @@ export function mergeVectorField(
     target: any,
     source: any,
     label: string,
-    mergeCode: UpdateCode,
+    mergeCode: MergeCode,
 ): boolean {
     let sourceVals = source[label]; //get(source, label);
     if (isNullish(sourceVals)) {

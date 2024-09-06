@@ -1,18 +1,18 @@
 import { isArrayOfAny, emptyObject, isNullish, isObject, isString, TupleObj } from "./type-utils";
 import { createGlobRegex, deepClone, getObjectKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
-import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
+import { UpdateCode, MergeCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { updateCodeInfo } from "./merge-high";
 
 export type DetailConfig = {
-    [key: string]: UpdateCode | DetailConfig;
+    [key: string]: MergeCode | DetailConfig;
 };
 
 export type MergeConfig = {
-    scalar?: UpdateCode, //default
-    vector?: UpdateCode, //array types
-    nested?: UpdateCode, //object types 
-    [glob: string]: UpdateCode | MergeConfig | undefined,
+    scalar?: MergeCode, //default
+    vector?: MergeCode, //array types
+    nested?: MergeCode, //object types 
+    [glob: string]: MergeCode | MergeConfig | undefined,
 };
 
 //-----------------------------------------------------------------------------
@@ -36,6 +36,7 @@ export function detailMerge(
     for (const label of mergeKeys) {
         const mergeCode = mergeCodes[label]!;
         if (!isString(mergeCode)) {
+            //todo should nest for empty target
             if ((isObject(target[label]) && isObject(source[label]))
                 ? detailMerge(target[label], source[label], mergeCode)
                 : mergeScalarField(target, source, label, UpdateCode.I)
@@ -99,7 +100,7 @@ export function selectDetailKeys(
 export function customMerge<T extends TupleObj>(
     target: T,
     source: Partial<T>,
-    mergeConf: MergeConfig | UpdateCode,
+    mergeConf: MergeConfig | MergeCode,
     excludeKeys?: string[],
 ): Partial<T> | false {
     //implement externally
@@ -139,7 +140,7 @@ export function customMerge<T extends TupleObj>(
  */
 export const fillUpdateCodes = (
     source: any,
-    mergeConf: MergeConfig | UpdateCode,
+    mergeConf: MergeConfig | MergeCode,
     excludeKeys?: string[],
     blockUnset: boolean = false,
 ): DetailConfig => {
@@ -181,7 +182,7 @@ export const fillUpdateCodes = (
         if (globIndex >= 0) {
             const globConf = mergeConf[globKeys[globIndex]!];
             if (isString(globConf)) {
-                mergeCodes[srcLabel] = globConf as UpdateCode;
+                mergeCodes[srcLabel] = globConf as MergeCode;
                 continue;
             } else if (isObject(srcValue)) {
                 mergeCodes[srcLabel] = fillUpdateCodes(srcValue, globConf!, [], blockUnset);
@@ -214,9 +215,9 @@ export function immutableCustomMerge(
     mergeConf: MergeConfig,
     skipFill?: boolean,
 ): any {
-    const mergeCodes = skipFill
-        ? mergeConf as DetailConfig
-        : fillUpdateCodes(source, mergeConf);
+    const mergeCodes = !skipFill
+        ? fillUpdateCodes(source, mergeConf)
+        : mergeConf as DetailConfig;
     const targetCopy = deepClone(target);
     detailMerge(targetCopy, source, mergeCodes);
     return targetCopy;

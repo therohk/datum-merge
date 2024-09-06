@@ -1,9 +1,8 @@
 import { isArrayOfAny, emptyObject, isObject, isString } from "./type-utils";
 import { deepClone, getObjectKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
-import { UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
+import { MergeCode, UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 
-export type MergeCode = `${UpdateCode}`;
 export type MergePerms = {
     enable: boolean;
     insert?: boolean;
@@ -12,7 +11,7 @@ export type MergePerms = {
 };
 
 export function updateCodeInfo(
-    mergeCode: UpdateCode | MergeCode,
+    mergeCode: MergeCode,
 ): MergePerms {
     if (!isString(mergeCode)) {
         return { enable: false };
@@ -48,8 +47,8 @@ export function updateCodeInfo(
 export function shallowMerge(
     target: any,
     source: any,
-    scalarCode: UpdateCode,
-    vectorCode?: UpdateCode,
+    scalarCode: MergeCode,
+    vectorCode?: MergeCode,
     excludeKeys?: string[],
     includeKeys?: string[], //for delete
 ): boolean {
@@ -79,8 +78,8 @@ export function shallowMerge(
 export function immutableMerge(
     target: any,
     source: any,
-    scalarCode: UpdateCode,
-    vectorCode?: UpdateCode,
+    scalarCode: MergeCode,
+    vectorCode?: MergeCode,
 ): any {
     const targetCopy = deepClone(target);
     shallowMerge(targetCopy, source, scalarCode, vectorCode);
@@ -95,8 +94,8 @@ export function immutableMerge(
 export function diffFromMerge(
     target: any,
     source: any,
-    scalarCode: UpdateCode,
-    vectorCode?: UpdateCode,
+    scalarCode: MergeCode,
+    vectorCode?: MergeCode,
 ): any | false {
     const targetCopy = immutableMerge(target, source, scalarCode, vectorCode);
     const delta = deepDiffTyped(target, targetCopy);
@@ -114,9 +113,9 @@ export function diffFromMerge(
 export function deepMerge(
     target: { [key: string]: any },
     source: { [key: string]: any },
-    scalarCode: UpdateCode,
-    vectorCode: UpdateCode,
-    nestedCode: UpdateCode,
+    scalarCode: MergeCode,
+    vectorCode: MergeCode,
+    nestedCode: MergeCode,
 ): boolean {
     const sourceKeys = getObjectKeys(source);
     if (!sourceKeys?.length) {
@@ -131,6 +130,7 @@ export function deepMerge(
             continue;
         }
         //recursive call for objects
+        //todo should nest for empty target
         if (isObject(target[label]) && isObject(source[label])) {
             if (nestedCode === UpdateCode.N)
                 continue;
@@ -162,9 +162,9 @@ export function deepMerge(
 export function immutableDeepMerge(
     target: { [key: string]: any },
     source: { [key: string]: any },
-    scalarCode: UpdateCode,
-    vectorCode?: UpdateCode,
-    nestedCode?: UpdateCode,
+    scalarCode: MergeCode,
+    vectorCode?: MergeCode,
+    nestedCode?: MergeCode,
 ): any {
     const targetCopy = deepClone(target);
     deepMerge(targetCopy, source,
