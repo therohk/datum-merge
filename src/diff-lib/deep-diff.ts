@@ -63,7 +63,7 @@ type Observer<LHS, RHS = LHS> = (diff: Diff<LHS, RHS>) => void;
 
 type FieldKey = string | number | symbol;
 type FieldPath = FieldKey[];
-// type StackItem<LHS, RHS = LHS> = { lhs: LHS, rhs: RHS };
+type StackItem<LHS, RHS = LHS> = { lhs: LHS, rhs: RHS };
 
 const typeNormalizer: PreFilterObject<any, any> = {
     normalize: function (currentPath: any, key: any, lhs: any, rhs: any): [any, any] {
@@ -293,7 +293,7 @@ function deepDiff<LHS, RHS = LHS>(
                     }
                 }
             }
-            stack.length = stack.length - 1;
+            stack.pop();
         } else if ((lhs as any) !== (rhs as any)) {
             // lhs is contains a cycle at this element and it differs from rhs
             changes.push({

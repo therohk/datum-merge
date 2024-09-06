@@ -11,20 +11,6 @@ export type MergePerms = {
     unset?: boolean;
 };
 
-export class MergeError extends Error {
-    readonly code = 500;
-    constructor(readonly data: {
-        e: string,  //error message
-        n?: string, //error name
-        s: any,     //source
-        v?: string, //container
-        t?: any,    //target
-    }) {
-        super(data.e);
-        this.name = data.n ?? 'MergeError';
-    }
-}
-
 export function updateCodeInfo(
     mergeCode: UpdateCode | MergeCode,
 ): MergePerms {

@@ -10,7 +10,6 @@ export { deepDiffTyped } from "./diff-high";
 export { UpdateCode } from "./merge-low";
 export { UpdateCode as MC } from "./merge-low";
 export { updateCodeInfo } from "./merge-high";
-export { MergeError } from "./merge-high";
 
 export { shallowMerge, immutableMerge } from "./merge-high";
 export { diffFromMerge } from "./merge-high";
