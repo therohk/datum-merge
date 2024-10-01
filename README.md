@@ -10,28 +10,22 @@
 
 ---
 
-## Upcoming Features
-
-1. inline the unmaintained [deep-diff](https://github.com/flitbit/diff) library which contains serious bugs. (available)
-
-2. support merging for top level arrays or primitives.
-
-3. option to throw error if field datatype changes during merge.
-
-4. project should compile in strict mode.
-
-5. formalize config schema for deeply nested objects (for v1).
-
-Code contributions are welcome via issues and pull requests.
-
----
-
 ## Sample Usage
 
-Merge with default or exact deep config:
+Merge with default config:
 ```
 import { merge, detailMerge, UpdateCode } from "datum-merge";
 let changed = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
+//same as
+changed = customMerge(target, source, { 
+    scalar: UpdateCode.I, 
+    vector: UpdateCode.XM, 
+    nested: UpdateCode.B 
+});
+```
+
+Exact nestable config that ignores all other fields:
+```
 changed = detailMerge(target, source, {
     mykey: UpdateCode.I, 
     myarr: UpdateCode.XM, 
@@ -56,17 +50,34 @@ const conf: MergeConfig = {
 };
 let diff = customMerge(target, source, conf);
 ```
+---
+
+## Upcoming Features
+
+1. inline the unmaintained [deep-diff](https://github.com/flitbit/diff) library which contains serious bugs. (available)
+
+2. support merging for top level arrays or primitives.
+
+3. option to throw error if field datatype changes during merge.
+
+4. project should compile in strict mode.
+
+5. formalize config schema for deeply nested objects (for v1).
+
+Code contributions are welcome via issues and pull requests.
+
+---
 
 ## Merge Strategy
 
 This string code describes how modifications to an attribute for a PUT/UPDATE operation should be handled.
-It decides whether a change to the value of the field is allowed during a merge operation between two entities.
+It decides whether a change to the value of the field is allowed during a merge between two entities.
 
 ### Strategy Codes
 
 The same field within a source and target object is represented by `s` and `t` respectively.
 Whether the strategy requires data to be present for the field, is shown by { 0=no, 1=yes, X=irrelavant }. 
-The value of the source field is migrated to the target field only if the predicate passes.
+The value is migrated from the source field to the target field only if the predicate passes.
 
 | Code Value | Predicate | Meaning |
 |----|----|----|
@@ -86,6 +97,8 @@ The value of the source field is migrated to the target field only if the predic
 | XS | `t + s` | preserve order insert (allows dupes) |
 | XF | `s + t` | insert from start (allows dupes) |
 
+### Diff Codes
+
 Applying the merge results in one of these transitions per primitive value in the target object.
 
 | Code Value | Meaning | Transitions |
@@ -94,7 +107,7 @@ Applying the merge results in one of these transitions per primitive value in th
 | N | new / insert   | `null <-- non-null` |
 | E | edit / update  | `non-null <-- non-null` |
 | D | unset / delete | `non-null <-- null` |
-| AN | array size increase | `non-null > non-null` |
-| AD | array size decrease | `non-null < non-null` |
+| AN | array size increase (tbd) | `non-null > non-null` |
+| AD | array size decrease (tbd) | `non-null < non-null` |
 
 ---

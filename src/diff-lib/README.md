@@ -8,17 +8,26 @@ it remains unmaintained and contains some serious bugs that made it unreliable f
 * tag:v1.0.2 [flitbit/diff/tests](https://github.com/flitbit/diff/blob/master/test/tests.js) 
 * tag:v1.0.5 [@types/deep-diff](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/deep-diff/index.d.ts)
 
-same interfaces have been exposed to maintain compatibility with last version .
-recommended method of invocation for simple use-cases is via diff-utils .
+same interfaces have been exposed to maintain compatibility with the last version .
 
 many thanks to the library author and all previous contributors !
 
 ## usage
 
+recommended to invoke via the wrapper method for simple cases :
 ```
-import { diff, accumulateDiff } from "datum-merge";
-const simpleDiff = diff(target, source);
-const customDiff = accumulateDiff(target, source, prefilter, accum, orderIndep);
+import { deepDiff } from "datum-merge";
+const datumDiff: Partial<MyType> = deepDiff<MyType>(target, source);
+```
+
+or use the existing library interfaces now with types : 
+```
+import { diff, Diff, applyChange } from "datum-merge";
+const simpleDiff: Diff[] = diff(target, source);
+for (const dif of simpleDiff) { applyChange(target, null, dif); }
+
+import { Diff, accumulateDiff, PreFilter, Accumulator } from "datum-merge";
+const customDiff: Diff[] = accumulateDiff(target, source, prefilter, accum, orderIndep);
 ```
 
 see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-documentation) in the original library for detailed examples .
@@ -26,10 +35,10 @@ see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-docum
 ## changes
 
 * all functions and responses are typed
-* lhs and rhs should be immutable ( bug when orderIndependent=true )
+* lhs and rhs should be immutable ( had bug when orderIndependent=true )
 * diff response should be immutable
 * general code upgrades and variable cleanup
 * avoid introducing any dependancies within module
-* support importing only diff as drop-in replacement ( todo )
+* publish only diff as a drop-in replacement package ( todo )
 
 ---
