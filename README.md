@@ -14,7 +14,7 @@
 
 Merge with default config:
 ```
-import { merge, detailMerge, UpdateCode } from "datum-merge";
+import { merge, customMerge, UpdateCode } from "datum-merge";
 let changed = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
 //same as
 changed = customMerge(target, source, { 
@@ -26,6 +26,7 @@ changed = customMerge(target, source, {
 
 Exact nestable config that ignores all other fields:
 ```
+import { detailMerge, UpdateCode } from "datum-merge";
 changed = detailMerge(target, source, {
     mykey: UpdateCode.I, 
     myarr: UpdateCode.XM, 
@@ -58,9 +59,9 @@ let diff = customMerge(target, source, conf);
 
 2. support merging for top level arrays or primitives.
 
-3. option to throw error if field datatype changes during merge.
+3. support a subset of [json-patch](https://jsonpatch.com/) operations. (beta)
 
-4. project should compile in strict mode.
+4. option to throw error if datatype of existing field changes during merge.
 
 5. formalize config schema for deeply nested objects (for v1).
 
@@ -101,13 +102,11 @@ The value is migrated from the source field to the target field only if the pred
 
 Applying the merge results in one of these transitions per primitive value in the target object.
 
-| Code Value | Meaning | Transitions |
-|----|----|----|
-| Z | noop / ignore  | `null <-- null` or `non-null == non-null` |
-| N | new / insert   | `null <-- non-null` |
-| E | edit / update  | `non-null <-- non-null` |
-| D | unset / delete | `non-null <-- null` |
-| AN | array size increase (tbd) | `non-null > non-null` |
-| AD | array size decrease (tbd) | `non-null < non-null` |
+| Code Value | Meaning | Patch | Transitions |
+|----|----|----|----|
+| N | new / insert   | `add` | `null <-- non-null` |
+| E | edit / update  | `replace` | `non-null <-- non-null` |
+| D | unset / delete | `remove` | `non-null <-- null` |
+| Z | noop / skip / ignore (tbd) | `test` | `null <-- null` or `non-null == non-null` |
 
 ---
