@@ -14,6 +14,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "preserveConstEnums": true,
     // "importHelpers": true,
     // "downlevelIteration": true,
     // "isolatedModules": true,

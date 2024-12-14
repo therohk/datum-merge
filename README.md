@@ -61,7 +61,7 @@ let diff = customMerge(target, source, conf);
 
 3. support a subset of [json-patch](https://jsonpatch.com/) operations. (beta)
 
-4. option to throw error if datatype of existing field changes during merge.
+4. option to ignore error if datatype of existing field changes during merge.
 
 5. formalize config schema for deeply nested objects (for v1).
 
@@ -102,11 +102,11 @@ The value is migrated from the source field to the target field only if the pred
 
 Applying the merge results in one of these transitions per primitive value in the target object.
 
-| Code Value | Meaning | Patch | Transitions |
+| Patch Code | Meaning | Rev Code | Transitions |
 |----|----|----|----|
-| N | new / insert   | `add` | `null <-- non-null` |
-| E | edit / update  | `replace` | `non-null <-- non-null` |
-| D | unset / delete | `remove` | `non-null <-- null` |
-| Z | noop / skip / ignore (tbd) | `test` | `null <-- null` or `non-null == non-null` |
+| `add`     | new / insert   | I | `null <-- non-null` |
+| `replace` | edit / update  | H | `non-null <-- non-null` |
+| `remove`  | unset / delete | D | `non-null <-- null` |
+| `test`    | noop / skip / ignore (tbd) | N | `null <-- null` or `non-null == non-null` |
 
 ---
