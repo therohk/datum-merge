@@ -130,6 +130,24 @@ export function customMerge<T extends TupleObj>(
 }
 
 /**
+ * custom merge but into a clone of target
+ * @returns new object with merged result
+ */
+export function immutableCustomMerge(
+    target: any,
+    source: any,
+    mergeConf: MergeConfig,
+    skipFill: boolean = false,
+): any {
+    const mergeCodes = !skipFill
+        ? fillUpdateCodes(source, mergeConf)
+        : mergeConf as DetailConfig;
+    const targetCopy = deepClone(target);
+    detailMerge(targetCopy, source, mergeCodes);
+    return targetCopy;
+}
+
+/**
  * creates a label to code mapping for source keys
  * must be invoked before every detail merge
  * @param source immutable incoming object for merge
@@ -162,19 +180,20 @@ export const fillUpdateCodes = (
             mergeCodes[srcLabel] = UpdateCode.N;
             continue;
         }
+        //force skip empty vals
+        if (isNullish(srcValue) && blockUnset) {
+            mergeCodes[srcLabel] = UpdateCode.N;
+            continue;
+        }
         //prefer exact key
         if (isString(labelConf)) {
             mergeCodes[srcLabel] = labelConf;
             continue;
         }
-        //force skip empty vals
-        if (isNullish(srcValue)) {
-            mergeCodes[srcLabel] = blockUnset ? UpdateCode.N : UpdateCode.D;
-            continue;
-        }
         //handle nesting
         if (isObject(labelConf) && isObject(srcValue)) {
             mergeCodes[srcLabel] = fillUpdateCodes(srcValue, labelConf, [], blockUnset);
+            //todo nested deletes ignored
             continue;
         }
         //handle globs
@@ -203,22 +222,4 @@ export const fillUpdateCodes = (
         throw new Error("illegal merge config state");
     }
     return mergeCodes;
-}
-
-/**
- * custom merge but into a clone of target
- * @returns new object with merged result
- */
-export function immutableCustomMerge(
-    target: any,
-    source: any,
-    mergeConf: MergeConfig,
-    skipFill?: boolean,
-): any {
-    const mergeCodes = !skipFill
-        ? fillUpdateCodes(source, mergeConf)
-        : mergeConf as DetailConfig;
-    const targetCopy = deepClone(target);
-    detailMerge(targetCopy, source, mergeCodes);
-    return targetCopy;
 }

@@ -85,3 +85,10 @@ export function isVectorArray(arr: any): arr is VectorArray {
         && ['string', 'number'].includes(typeof arr[0]);
     //dont encourage boolean arrays
 }
+
+export function emptyValue(obj: any): boolean {
+    return (obj === undefined)
+        || (obj === null)
+        || (Array.isArray(obj) && !obj.length)
+        || (typeof obj === "object" && !Object.keys(obj).length);
+}

@@ -1,6 +1,6 @@
 // import { get, has, set, unset } from "lodash-es";
 import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lodash-es";
-import { isArrayOfAny, isNullish } from "./type-utils";
+import { emptyValue, isArrayOfAny, isNullish } from "./type-utils";
 import { areArraysEqual, deepClone } from "./datum-utils";
 
 export const UpdateCode = {
@@ -75,16 +75,16 @@ export function mergeScalarField(
         case UpdateCode.XI:
             return mergeVectorField(target, source, label, mergeCode);
     }
-    if (migrateVal) {
-        if (sourceHas) {
-            // isPrimitive(source[label]); //avoid cloning
-            target[label] = deepClone(source[label]);
-        } else {
-            delete target[label];
-        }
-        return true;
+    if (!migrateVal) {
+        return false;
     }
-    return false;
+    // isPrimitive(source[label]); //avoid cloning
+    target[label] = deepClone(source[label]);
+    if (emptyValue(target[label])) {
+        delete target[label];
+        return targetHas;
+    }
+    return true;
 };
 
 export function mergeVectorField(
@@ -123,7 +123,7 @@ export function mergeVectorField(
             targetVals = concat(target[label] ?? [], sourceVals);
             break;
         case UpdateCode.XF:
-            //entire array appears in diff
+            //entire array is diff (use orderInd=true)
             targetVals = concat(sourceVals, target[label] ?? []);
             break;
         case UpdateCode.B:
@@ -142,13 +142,12 @@ export function mergeVectorField(
     }
     if (!targetVals?.length) {
         delete target[label];
-        return true;
+        return targetHas;
     }
 
     const changed = !areArraysEqual(targetVals, target[label]);
     // && !deepEquals(targetVals, target[label]);
     //always clone source objects?
     target[label] = targetVals; //array replaced
-    // set(target, label, targetVals);
     return changed;
 };

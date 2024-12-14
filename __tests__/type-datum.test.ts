@@ -1,4 +1,4 @@
-import { emptyObject, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, isVectorArray } from "../src/type-utils";
+import { emptyObject, emptyValue, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, isVectorArray } from "../src/type-utils";
 import { areArraysEqual, deepClone, deepEquals, flattenObject, unflattenObject } from "../src/datum-utils";
 import { deepDiffFlat, deepDiffTyped } from "../src/diff-high";
 
@@ -19,6 +19,12 @@ describe("validate-utils", () => {
         expect(emptyObject([2])).toBe(false);
         expect(emptyObject({})).toBe(true);
         expect(emptyObject({ x: undefined })).toBe(false);
+
+        expect(emptyValue("")).toBe(false);
+        expect(emptyValue([])).toBe(true);
+        expect(emptyValue([undefined])).toBe(false);
+        expect(emptyValue({})).toBe(true);
+        expect(emptyValue({ x: undefined })).toBe(false);
 
         //safe arrays
         //obsolete: all types accepted now
