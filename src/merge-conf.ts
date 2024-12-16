@@ -36,13 +36,19 @@ export function detailMerge(
     for (const label of mergeKeys) {
         const mergeCode = mergeCodes[label]!;
         if (!isString(mergeCode)) {
-            //todo should nest for empty target
-            if ((isObject(target[label]) && isObject(source[label]))
-                ? detailMerge(target[label], source[label], mergeCode)
-                : mergeScalarField(target, source, label, UpdateCode.I)
-            ) {
-                changed = true;
+            if (isObject(target[label]) && isObject(source[label])) {
+                changed = detailMerge(target[label], source[label], mergeCode) || changed;
+                continue;
             }
+            if (!isObject(target[label]) && isObject(source[label])) {
+                const targetVal = {};
+                detailMerge(targetVal, source[label], mergeCode);
+                //type mismatch failure if exists
+                changed = mergeScalarField(target, { [label]: targetVal }, label, UpdateCode.I) || changed;
+                continue;
+            }
+            //bad config scenario
+            changed = mergeScalarField(target, source, label, UpdateCode.I) || changed;
             continue;
         }
         if (mergeCode.toString().startsWith("X")

@@ -1,6 +1,7 @@
 import { deepClone } from "../src/datum-utils";
 import { UpdateCode } from "../src/merge-low";
-import { DetailConfig, fillUpdateCodes, immutableCustomMerge, immutableDetailMerge } from "../src/merge-conf";
+import { DetailConfig, immutableDetailMerge } from "../src/merge-conf";
+import { MergeConfig, fillUpdateCodes, immutableCustomMerge } from "../src/merge-conf";
 
 describe("validate-merge-conf", () => {
 
@@ -17,24 +18,23 @@ describe("validate-merge-conf", () => {
         const mCodesBkp = deepClone(mCodes);
         const oCodesBkp = deepClone(oCodes);
 
-        expect(immutableDetailMerge(deepT, deepS, nCodes)).toMatchObject(deepT);
-        expect(immutableDetailMerge(deepT, deepS, {})).toMatchObject(deepT);
-        expect(immutableDetailMerge(deepT, deepS, yCodes)).toMatchObject(deepS);
-        expect(immutableDetailMerge(deepT, deepT, yCodes)).toMatchObject(deepT);
+        expect(immutableDetailMerge(deepT, deepS, nCodes)).toEqual(deepT);
+        expect(immutableDetailMerge(deepT, deepS, {})).toEqual(deepT);
+        expect(immutableDetailMerge(deepT, deepS, yCodes)).toEqual(deepS);
+        expect(immutableDetailMerge(deepT, deepT, yCodes)).toEqual(deepT);
 
         const mDeepT = immutableDetailMerge(deepT, deepS, mCodes);
         expect(mDeepT.oa.length).toBe(4);
-        expect(mDeepT.o).toMatchObject(deepS.o);
+        expect(mDeepT.o).toEqual(deepS.o);
         expect(mDeepT.del).not.toBeDefined();
 
         const oDeepT = immutableDetailMerge(deepT, deepS, oCodes);
-        expect(oDeepT.oa).toMatchObject([{ b: "b" }]);
-        expect(oDeepT.o).toMatchObject({ z: ["c", "a", "b"] });
-        expect(oDeepT.del).toBeDefined();
+        expect(oDeepT.oa).toEqual([{ b: "b" }]);
+        expect(oDeepT.o).toEqual({ z: ["c", "a", "b"] });
+        expect(oDeepT.del).toEqual("x");
 
         expect(mCodes).toEqual(mCodesBkp);
         expect(oCodes).toEqual(oCodesBkp);
-
     });
 
     test('should custom merge fields with filled config', async () => {
@@ -42,11 +42,12 @@ describe("validate-merge-conf", () => {
         expect(immutableCustomMerge({}, { s: "new" }, { scalar: UpdateCode.B })).toEqual({ s: "new" });
         expect(immutableCustomMerge({ v: ["old"] }, { v: "new" }, { "*": UpdateCode.XM }).v).toEqual(["old", "new"]);
 
-        const ucTrg = { sc: "t", vc: ["1", "2"], m: ["2"], pAt2: 3 };
+        const ucTrg = { sc: "t", vc: ["1", "2"], m: ["2"], pAt2: 3, obu: { y: "t" } };
         const ucTest = {
-            sc: "s", vc: ["3", "1"], m: ["3"], pAt: "val", pAt2: 2,
+            sc: "s", vc: ["3", "1"], m: ["3"], pAt: "s", pAt2: 2,
             e1: null, e2: undefined, e3: {}, e4: [],
-            ob: { x: 1 }, odp: [{ a: "1" }, { a: "2" }]
+            ono: [{ a: "1" }, { a: "2" }],
+            obs: { x: 1, y: "s" }, obv: { x: 2 }, obu: { z: 3 },
         };
 
         expect(fillUpdateCodes(ucTrg, {})).toMatchObject({ sc: UpdateCode.B, vc: UpdateCode.XS, m: UpdateCode.XS, pAt2: UpdateCode.B });
@@ -58,14 +59,23 @@ describe("validate-merge-conf", () => {
         expect(immutableCustomMerge(ucTrg, ucTest, { scalar: UpdateCode.Y, vector: UpdateCode.XR, nested: UpdateCode.Y })).toBeDefined();
         expect(immutableCustomMerge(ucTrg, ucTest, { scalar: UpdateCode.B, vector: UpdateCode.XM, nested: UpdateCode.B })).toBeDefined();
 
-        expect(immutableCustomMerge(ucTrg, ucTest, {
+        const mergeConf: MergeConfig = {
+            vc: UpdateCode.XI,
+            m: UpdateCode.XF,
+            ["e*"]: UpdateCode.Y,
             ["*A*"]: UpdateCode.I,
-            "m": UpdateCode.XF,
-            "vc": UpdateCode.XI,
-            ob: { x: UpdateCode.XI },
-            vector: UpdateCode.N,
-        })).toEqual({ sc: "s", vc: ["1"], m: ["3", "2"], pAt: "val", pAt2: 3, ob: { x: 1 } });
+            vector: UpdateCode.XI,
+            ["ob*"]: { x: UpdateCode.B, y: UpdateCode.N, z: UpdateCode.XM },
+            obv: UpdateCode.XM,
+        };
+        expect(fillUpdateCodes(ucTest, {}, [], true)).toMatchObject({ e1: 'N', e2: 'N', e3: 'N', e4: 'XS' });
+        expect(fillUpdateCodes(ucTest, mergeConf)).toMatchObject({ obs: { x: 'B', y: 'N' }, obv: 'XM', obu: { z: 'XM' } });
 
+        expect(immutableCustomMerge(ucTrg, ucTest, mergeConf)).toEqual({
+            sc: "s", vc: ["1"], m: ["3", "2"],
+            pAt: "s", pAt2: 3, e3: {}, e4: [],
+            obs: { x: 1 }, obv: [{ x: 2 }], obu: { y: "t", z: [3] },
+        });
     });
 
 });
