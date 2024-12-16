@@ -22,6 +22,10 @@ export { type MergeConfig } from "./merge-conf";
 export { fillUpdateCodes } from "./merge-conf";
 export { customMerge, immutableCustomMerge } from "./merge-conf";
 
+export { type PatchResult } from "./patch-low";
+export { diffToPatchLog, asLodashPath } from "./patch-low";
+export { deepDiffPatch } from "./diff-high";
+
 //defaults
 export { deepMerge as merge } from "./merge-high";
 export { customMerge as mergeDiff } from "./merge-conf";

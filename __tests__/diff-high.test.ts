@@ -1,8 +1,7 @@
 
 import { deepClone, deepEquals } from "../src/datum-utils";
 import { Diff } from "../src/diff-lib/deep-diff";
-import { deepDiffLow, deepDiffTyped } from "../src/diff-high";
-import { diffToPatch } from "../src/patch-low";
+import { deepDiffLow, deepDiffPatch, deepDiffTyped } from "../src/diff-high";
 
 describe("validate-diff-utils", () => {
 
@@ -38,18 +37,18 @@ describe("validate-diff-utils", () => {
 
     test('should generate json patch from diff', async () => {
 
-        const trg = { arN: ["a"], arD: ["a", "b"], d: "del", ['e/e']: "old", vD: ["del"], oa: [{ x: "a" }, { b: "b" }], oD: { x: "y" } };
-        const src = { arN: ["y", "z"], arD: ["z"], n: "new", ['e/e']: "new", vN: ["new"], oa: [{ y: "b" }, { b: "b" }], ['s~N']: ["1", "2"] };
+        const trg = { arN: ["a"], arD: ["a", "b"], d: "del", ['e/e']: "old", vD: ["del"], oi: ["1", "2"], oa: [{ x: "a" }, { b: "b" }], oD: { x: "y" } };
+        const src = { arN: ["y", "z"], arD: ["z"], n: "new", ['e/e']: "new", vN: ["new"], oi: ["2", "1"], oa: [{ y: "b" }, { b: "b" }], ['s~N']: ["1", "2"] };
 
         const tsDiff: ReadonlyArray<Diff<any, any>> = deepDiffLow(trg, src, false) || [];
         const tsoiDiff: ReadonlyArray<Diff<any, any>> = deepDiffLow(trg, src, true) || [];
         expect(tsDiff).not.toMatchObject(tsoiDiff);
 
-        const tsPatch = diffToPatch(tsDiff);
-        const tsoiPatch = diffToPatch(tsoiDiff);
+        const tsPatch = deepDiffPatch(trg, src, false);
+        const tsoiPatch = deepDiffPatch(trg, src, true);
 
-        expect(tsDiff.length).toEqual(tsPatch.length);
-        expect(tsoiDiff.length).toEqual(tsoiPatch.length);
+        expect(tsPatch.length).toEqual(tsDiff.length);
+        expect(tsoiPatch.length).toEqual(tsoiDiff.length);
     });
 
 });

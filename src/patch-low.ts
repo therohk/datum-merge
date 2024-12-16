@@ -1,13 +1,13 @@
-import { emptyArray } from "./type-utils";
+import { toPath } from "lodash-es";
 import { Diff } from "./diff-lib/deep-diff";
 
 export type PatchResult<T = any> = {
     path: string;
     op: 'add' | "remove" | "replace";
     value?: T;
-}
+};
 
-function escapePathComponent(
+function escapePathPart(
     path: string | number
 ): string {
     if (typeof path === 'number')
@@ -17,8 +17,20 @@ function escapePathComponent(
     return path.replace(/~/g, '~0').replace(/\//g, '~1');
 }
 
-function unescapePathComponent(path: string): string {
+function unescapePathPart(path: string): string {
     return path.replace(/~1/g, '/').replace(/~0/g, '~');
+}
+
+function asPatchPath(path: string[]): string {
+    return "/" + (path?.map((s) => escapePathPart(s)).join("/") ?? "");
+}
+
+export function asLodashPath(pointer: string): string[] {
+    if (!pointer || !pointer.startsWith("/"))
+        return null;
+    const parts: string[] = pointer.slice(1).split("/")
+        .map((s) => unescapePathPart(s));
+    return !parts?.length ? [] : toPath(parts.join("."));
 }
 
 /**
@@ -26,13 +38,12 @@ function unescapePathComponent(path: string): string {
  * only requires add/replace/remove operations
  * can be used with any diff operation
  */
-export function diffToPatch(
+export function diffToPatchLog(
     differences: readonly Diff<any, any>[]
 ): PatchResult[] {
     const jsonPatch: PatchResult[] = [];
     for (const difference of differences) {
-        const difPath = emptyArray(difference.path) ? ""
-            : "/" + difference.path?.map(p => escapePathComponent(p)).join("/");
+        const difPath = asPatchPath(difference.path);
         switch (difference.kind) {
             case "N":
                 jsonPatch.push({ op: "add", path: difPath, value: difference.rhs });

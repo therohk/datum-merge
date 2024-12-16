@@ -1,6 +1,7 @@
 import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff";
 // import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff"; //old library
 import { flattenObject, getObjectKeys } from "./datum-utils";
+import { PatchResult, diffToPatchLog } from "./patch-low";
 
 export function deepDiffFlat(
     oldFlat: any, //source
@@ -48,6 +49,15 @@ function cleanupObjArrays(obj: any): void {
         }
     }
 }
+
+export function deepDiffPatch(
+    lhsObj: { [key: string]: any }, //target
+    rhsObj: { [key: string]: any }, //source
+    orderInd: boolean = false,
+): PatchResult[] {
+    const differences = deepDiffLow(lhsObj, rhsObj, orderInd);
+    return !differences ? [] : diffToPatchLog(differences);
+};
 
 export function deepDiffLow<T, S>(
     lhsObj: T,
