@@ -15,21 +15,21 @@
 Merge with default config:
 ```
 import { merge, customMerge, UpdateCode } from "datum-merge";
-let changed = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
+const changed = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
 //same as
-changed = customMerge(target, source, { 
-    scalar: UpdateCode.I, 
-    vector: UpdateCode.XM, 
-    nested: UpdateCode.B 
+const diff = customMerge(target, source, {
+    scalar: UpdateCode.I,
+    vector: UpdateCode.XM,
+    nested: UpdateCode.B,
 });
 ```
 
 Exact nestable config that ignores all other fields:
 ```
 import { detailMerge, UpdateCode } from "datum-merge";
-changed = detailMerge(target, source, {
-    mykey: UpdateCode.I, 
-    myarr: UpdateCode.XM, 
+const changed = detailMerge(target, source, {
+    mykey: UpdateCode.I,
+    myarr: UpdateCode.XM,
     anobj: UpdateCode.B,
     myobj: { myid: UpdateCode.I },
 });
@@ -49,7 +49,7 @@ const conf: MergeConfig = {
         vector: UpdateCode.XM,
     },
 };
-let diff = customMerge(target, source, conf);
+const diff = customMerge(target, source, conf);
 ```
 ---
 
@@ -57,13 +57,13 @@ let diff = customMerge(target, source, conf);
 
 1. inline the unmaintained [deep-diff](https://github.com/flitbit/diff) library which contains serious bugs. (available)
 
-2. support merging for top level arrays or primitives.
+2. formalize config schema for deeply nested objects (for v1).
 
-3. support a subset of [json-patch](https://jsonpatch.com/) operations. (beta)
+3. option to ignore errors for datatype mismatch during merge.
 
-4. option to ignore error if datatype of existing field changes during merge.
+4. support merging for top level arrays or primitives.
 
-5. formalize config schema for deeply nested objects (for v1).
+5. accept a subset of [json-patch](https://jsonpatch.com/) operations for merge.
 
 Code contributions are welcome via issues and pull requests.
 
@@ -80,7 +80,7 @@ The same field within a source and target object is represented by `s` and `t` r
 Whether the strategy requires data to be present for the field, is shown by { 0=no, 1=yes, X=irrelavant }. 
 The value is migrated from the source field to the target field only if the predicate passes.
 
-| Code Value | Predicate | Meaning |
+| Code | Predicate | Meaning |
 |----|----|----|
 | C | n/a | always create new instance |
 | T | n/a | touch datum ; empty merge |
@@ -102,7 +102,7 @@ The value is migrated from the source field to the target field only if the pred
 
 Applying the merge results in one of these transitions per primitive value in the target object.
 
-| Patch Code | Meaning | Rev Code | Transitions |
+| Patch Op | Meaning | Rev Code | Transitions |
 |----|----|----|----|
 | `add`     | new / insert   | I | `null <-- non-null` |
 | `replace` | edit / update  | H | `non-null <-- non-null` |
