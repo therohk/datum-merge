@@ -1,6 +1,6 @@
 // import { get, has, set, unset } from "lodash-es";
 import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lodash-es";
-import { emptyValue, isArrayOfAny, isNullish } from "./type-utils";
+import { emptyValue, isArrayOfAny, isNullish, typeOfValue } from "./type-utils";
 import { areArraysEqual, deepClone } from "./datum-utils";
 
 export const UpdateCode = {
@@ -38,8 +38,8 @@ export function mergeScalarField(
     }
     if (targetHas && sourceHas) {
         //lhs vs rhs type check
-        if (typeof target[label] !== typeof source[label]) {
-            throw new TypeError("field type mismatch for " + label);
+        if (typeOfValue(target[label]) !== typeOfValue(source[label])) {
+            throw new TypeError("scalar type mismatch for " + label);
         }
         if (target[label] === source[label]) {
             return false;
@@ -93,7 +93,7 @@ export function mergeVectorField(
     label: string,
     mergeCode: MergeCode,
 ): boolean {
-    let sourceVals = source[label]; //get(source, label);
+    let sourceVals = source[label];
     if (isNullish(sourceVals)) {
         return false; //sourceHas
     }

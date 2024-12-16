@@ -79,16 +79,20 @@ export function isArrayOfSame(arr: any): string | false {
         ? typeof arr[0] : false;
 }
 
-export function isVectorArray(arr: any): arr is VectorArray {
-    return Array.isArray(arr)
-        && new Set(arr.map((e) => typeof e)).size === 1
-        && ['string', 'number'].includes(typeof arr[0]);
-    //dont encourage boolean arrays
+export function emptyValue(value: any): boolean {
+    return (value === undefined)
+        || (value === null)
+        || (Array.isArray(value) && !value.length)
+        || (typeof value === "object" && !Object.keys(value).length);
 }
 
-export function emptyValue(obj: any): boolean {
-    return (obj === undefined)
-        || (obj === null)
-        || (Array.isArray(obj) && !obj.length)
-        || (typeof obj === "object" && !Object.keys(obj).length);
+export function typeOfValue(value: any): string {
+    const type = typeof value;
+    if (type !== 'object') {
+        return type; //scalar
+    } else if (Array.isArray(value)) {
+        return 'array'; //vector
+    } else {
+        return 'object'; //nested
+    }
 }

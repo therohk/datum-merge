@@ -1,4 +1,4 @@
-import { emptyObject, emptyValue, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, isVectorArray } from "../src/type-utils";
+import { emptyObject, emptyValue, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, typeOfValue } from "../src/type-utils";
 import { areArraysEqual, deepClone, deepEquals, flattenObject, unflattenObject } from "../src/datum-utils";
 import { deepDiffFlat, deepDiffTyped } from "../src/diff-high";
 
@@ -26,14 +26,15 @@ describe("validate-utils", () => {
         expect(emptyValue({})).toBe(true);
         expect(emptyValue({ x: undefined })).toBe(false);
 
-        //safe arrays
-        //obsolete: all types accepted now
-        expect(isVectorArray(["str", "str"])).toBe(true);
-        expect(isVectorArray([2, 2])).toBe(true);
-        expect(isVectorArray(["2", 2])).toBe(false);
-        expect(isVectorArray("str")).toBe(false);
-        expect(isVectorArray([true, false])).toBe(false);
-        expect(isVectorArray([{}, {}])).toBe(false);
+        expect(typeOfValue("")).toBe("string");
+        expect(typeOfValue(123)).toBe("number");
+        expect(typeOfValue(false)).toBe("boolean");
+        expect(typeOfValue([])).toBe("array");
+        expect(typeOfValue([{}])).toBe("array");
+        expect(typeOfValue({})).toBe("object");
+        expect(typeOfValue({ x: [] })).toBe("object");
+        expect(typeOfValue(new Date())).toBe("object");
+        expect(typeOfValue(/.*/)).toBe("object");
 
         //generic array
         expect(isArrayOfAny(undefined)).toBe(false);
