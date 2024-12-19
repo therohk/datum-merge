@@ -24,7 +24,7 @@ export { customMerge, immutableCustomMerge } from "./merge-conf";
 
 export { type PatchResult } from "./patch-low";
 export { diffToPatchLog, asLodashPath } from "./patch-low";
-export { deepDiffPatch } from "./diff-high";
+export { deepPatchLog } from "./patch-low";
 
 //defaults
 export { deepMerge as merge } from "./merge-high";
