@@ -93,7 +93,7 @@ The value is migrated from the source field to the target field only if the pred
 | D | `s0 & tX` | delete only, no update or insert |
 | XR | `sX & tX` | full vector replacement |
 | XM | `s ∪ t`   | set union, vector merge |
-| XD | `s - t`   | set difference, delete given values |
+| XD | `t - s`   | set difference, delete given values |
 | XI | `s ∩ t`   | set intersection, delete missing values |
 | XS | `t + s` | preserve order insert (allows dupes) |
 | XF | `s + t` | insert from start (allows dupes) |
