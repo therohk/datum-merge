@@ -1,11 +1,48 @@
 import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff";
 // import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff"; //old library
-import { flattenObject, getObjectKeys } from "./datum-utils";
+import { getObjectKeys } from "./datum-utils";
+
+export function deepDiffTyped<T>(
+    lhsObj: T, //target
+    rhsObj: T, //source
+    orderInd: boolean = false,
+): Partial<T> {
+    const differences = deepDiffLow(lhsObj, rhsObj, orderInd);
+    const deltaObj: Partial<T> = {};
+    if (!differences) {
+        return deltaObj;
+    }
+    for (const difference of differences) {
+        applyChange(deltaObj, null, difference);
+    }
+    //remove empty items in arrays
+    for (const objKey of getObjectKeys(deltaObj)) {
+        if (deltaObj[objKey]?.filter) {
+            deltaObj[objKey] = deltaObj[objKey].filter((e: any) => !!e);
+        }
+    }
+    return deltaObj;
+};
+
+export function deepDiffLow<T, S>(
+    lhsObj: T,
+    rhsObj: S,
+    orderInd: boolean = false,
+): readonly Diff<T, S>[] | false {
+    const differences = !orderInd
+        ? diff(lhsObj, rhsObj)
+        : orderIndependentDiff(lhsObj, rhsObj);
+    return !differences?.length
+        ? false
+        : differences;
+};
+
+//-----------------------------------------------------------------------------
 
 export function deepDiffFlat(
     oldFlat: any, //source
     newFlat: any, //target
-    flatten: boolean = false,
+    flatten: boolean = true,
 ): [any, any] {
     if (flatten) {
         oldFlat = flattenObject(oldFlat);
@@ -23,41 +60,43 @@ export function deepDiffFlat(
     return [updated, removed];
 }
 
-export function deepDiffTyped<T>(
-    lhsObj: T, //target
-    rhsObj: T, //source
-    orderInd: boolean = false,
-): Partial<T> {
-    const differences = deepDiffLow(lhsObj, rhsObj, orderInd);
-    const deltaObj: Partial<T> = {};
-    if (!differences) {
-        return deltaObj;
-    }
-    for (const difference of differences) {
-        applyChange(deltaObj, null, difference);
-    }
-    cleanupObjArrays(deltaObj);
-    return deltaObj;
-};
-
-function cleanupObjArrays(obj: any): void {
-    //remove empty items in array
-    for (const objKey of getObjectKeys(obj)) {
-        if (obj[objKey]?.filter) {
-            obj[objKey] = obj[objKey].filter((e: any) => !!e);
+export function flattenObject(
+    obj: { [key: string]: any }
+): { [key: string]: any } {
+    const flatObj: { [key: string]: any } = {};
+    const path: any[] = [];
+    const isObject = (value: any) => Object(value) === value;
+    function dig(obj: any) {
+        for (const [key, value] of Object.entries(obj)) {
+            path.push(key);
+            if (isObject(value)) {
+                dig(value);
+            } else {
+                flatObj[path.join('.')] = value;
+            }
+            path.pop();
         }
     }
+    dig(obj);
+    return flatObj;
 }
 
-export function deepDiffLow<T, S>(
-    lhsObj: T,
-    rhsObj: S,
-    orderInd: boolean = false,
-): readonly Diff<T, S>[] | false {
-    const differences = !orderInd
-        ? diff(lhsObj, rhsObj)
-        : orderIndependentDiff(lhsObj, rhsObj);
-    return !differences?.length
-        ? false
-        : differences;
-};
+export function unflattenObject(
+    flatObj: { [key: string]: any }
+): { [key: string]: any } {
+    const unflatObj: { [key: string]: any } = {};
+    for (const [path, value] of Object.entries(flatObj)) {
+        const parts = path.split('.');
+        let obj = unflatObj;
+        for (const [i, key] of parts.slice(0, -1).entries()) {
+            if (!obj[key]) {
+                const needArray = Number.isInteger(Number(parts[+i + 1]));
+                obj[key] = needArray ? [] : {};
+            }
+            obj = obj[key];
+        }
+        const lastkey = parts.pop();
+        obj[lastkey!] = value;
+    }
+    return unflatObj;
+}

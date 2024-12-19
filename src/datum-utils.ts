@@ -1,4 +1,4 @@
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, get } from "lodash-es";
 import equal from 'fast-deep-equal';
 
 export function getObjectKeys(
@@ -20,8 +20,19 @@ export function getObjectKeys(
     return sourceKeys;
 };
 
+export function createValueKeys<T>(
+    keys: string[],
+    value: T,
+): { [key: string]: T } {
+    return Object.fromEntries(keys.map((k) => [k, value]));
+}
+
 export function deepEquals(lhs: any, rhs: any): boolean {
     return equal(lhs, rhs);
+}
+
+export function deepEqualsPath(lhs: any, rhs: any, atPath: string): boolean {
+    return equal(get(lhs, atPath), get(rhs, atPath));
 }
 
 export function deepClone(val: any): any {
@@ -76,47 +87,4 @@ export function selectGlobKeys(
         }
     }
     return includeKeys;
-}
-
-//-----------------------------------------------------------------------------
-
-export function flattenObject(
-    obj: { [key: string]: any }
-): { [key: string]: any } {
-    const flatObj: { [key: string]: any } = {};
-    const path: any[] = [];
-    const isObject = (value: any) => Object(value) === value;
-    function dig(obj: any) {
-        for (const [key, value] of Object.entries(obj)) {
-            path.push(key);
-            if (isObject(value)) {
-                dig(value);
-            } else {
-                flatObj[path.join('.')] = value;
-            }
-            path.pop();
-        }
-    }
-    dig(obj);
-    return flatObj;
-}
-
-export function unflattenObject(
-    flatObj: { [key: string]: any }
-): { [key: string]: any } {
-    const unflatObj: { [key: string]: any } = {};
-    for (const [path, value] of Object.entries(flatObj)) {
-        const chain = path.split('.');
-        let obj = unflatObj;
-        for (const [i, key] of chain.slice(0, -1).entries()) {
-            if (!obj[key]) {
-                const needArray = Number.isInteger(Number(chain[+i + 1]));
-                obj[key] = needArray ? [] : {};
-            }
-            obj = obj[key];
-        }
-        const lastkey = chain.pop();
-        obj[lastkey!] = value;
-    }
-    return unflatObj;
 }

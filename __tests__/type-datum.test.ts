@@ -1,6 +1,6 @@
 import { emptyObject, emptyValue, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, typeOfValue } from "../src/type-utils";
-import { areArraysEqual, deepClone, deepEquals, flattenObject, unflattenObject } from "../src/datum-utils";
-import { deepDiffFlat, deepDiffTyped } from "../src/diff-high";
+import { areArraysEqual, deepClone, deepEquals, deepEqualsPath } from "../src/datum-utils";
+import { deepDiffFlat, deepDiffTyped, flattenObject, unflattenObject } from "../src/diff-high";
 
 describe("validate-utils", () => {
 
@@ -63,14 +63,12 @@ describe("validate-utils", () => {
 
         const flatOne = flattenObject(one);
         const flatTwo = flattenObject(two);
-        // console.log("flat", flatObj);
         expect(one).toMatchObject(unflattenObject(flatOne));
         expect(two).toMatchObject(unflattenObject(flatTwo));
 
         const [updated, removed] = deepDiffFlat(two, one, true);
         expect(updated).toBeDefined();
         expect(removed).toBeDefined();
-        // console.log("fdiff", { updated, removed });
 
         expect(one).toEqual(oneBkp);
         expect(two).toEqual(twoBkp);
@@ -87,6 +85,10 @@ describe("validate-utils", () => {
 
         expect(deepEquals(lhsO.v, rhsO.v)).toBeTruthy();
         expect(deepEquals(lhsO.o, rhsO.o)).toBeTruthy();
+
+        expect(deepEqualsPath(lhsO, rhsO, "v")).toBeTruthy();
+        expect(deepEqualsPath(lhsO, rhsO, "o")).toBeTruthy();
+        expect(deepEqualsPath(lhsO, { o: rhsO.v }, "o")).toBeFalsy();
 
         expect(deepDiffFlat(rhsO, lhsO, true)).toMatchObject([{}, {}]);
         expect(deepDiffTyped<any>(lhsO, rhsO)).toEqual({});
