@@ -1,6 +1,5 @@
 import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff";
 // import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff"; //old library
-import { getObjectKeys } from "./datum-utils";
 
 export function deepDiffTyped<T>(
     lhsObj: T, //target
@@ -15,14 +14,18 @@ export function deepDiffTyped<T>(
     for (const difference of differences) {
         applyChange(deltaObj, null, difference);
     }
-    //remove empty items in arrays
-    for (const objKey of getObjectKeys(deltaObj)) {
-        if (deltaObj[objKey]?.filter) {
-            deltaObj[objKey] = deltaObj[objKey].filter((e: any) => !!e);
-        }
-    }
+    cleanupObjArrays(deltaObj);
     return deltaObj;
 };
+
+function cleanupObjArrays(obj: any): void {
+    //remove empty items in array
+    for (const objKey of Object.keys(obj)) {
+        if (obj[objKey]?.filter) {
+            obj[objKey] = obj[objKey].filter((e: any) => !!e);
+        }
+    }
+}
 
 export function deepDiffLow<T, S>(
     lhsObj: T,

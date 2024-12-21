@@ -20,7 +20,7 @@ export function diffToPatchLog(
 ): PatchResult[] {
     const jsonPatch: PatchResult[] = [];
     for (const dif of differences) {
-        let pointer = asJsonPointer(dif.path);
+        let pointer = asJsonPointer(dif.path ?? []);
         switch (dif.kind) {
             case "N":
                 jsonPatch.push({ op: "add", path: pointer, value: dif.rhs });
@@ -79,7 +79,7 @@ function asJsonPointer(path: string[]): string {
 
 export function asLodashPath(pointer: string): string[] {
     if (!pointer || !pointer.startsWith("/"))
-        return null;
+        return [];
     const parts: string[] = pointer.slice(1).split("/")
         .map((s) => unescapePathPart(s));
     return !parts?.length ? [] : toPath(parts.join("."));

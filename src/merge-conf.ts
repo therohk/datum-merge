@@ -171,7 +171,7 @@ export const fillUpdateCodes = (
     if (isString(mergeConf)) {
         mergeConf = { scalar: mergeConf };
     }
-    const deepConf: MergeConfig = {
+    const deepConf = {
         scalar: mergeConf?.scalar ?? UpdateCode.B,
         vector: mergeConf?.vector ?? UpdateCode.XS,
         nested: mergeConf?.nested ?? UpdateCode.N,
@@ -214,7 +214,8 @@ export const fillUpdateCodes = (
             if (isString(globConf)) {
                 mergeCodes[srcLabel] = globConf as MergeCode;
                 continue;
-            } else if (isObject(srcValue)) {
+            }
+            if (isObject(globConf) && isObject(srcValue)) {
                 mergeCodes[srcLabel] = fillUpdateCodes(srcValue, globConf!, blockUnset);
                 continue;
             }
