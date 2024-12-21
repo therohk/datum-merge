@@ -171,6 +171,11 @@ export const fillUpdateCodes = (
     if (isString(mergeConf)) {
         mergeConf = { scalar: mergeConf };
     }
+    const deepConf: MergeConfig = {
+        scalar: mergeConf?.scalar ?? UpdateCode.B,
+        vector: mergeConf?.vector ?? UpdateCode.XS,
+        nested: mergeConf?.nested ?? UpdateCode.N,
+    };
     const globKeys: string[] = getObjectKeys(mergeConf)
         .filter((s) => s.includes("*"));
     const globPats: RegExp[] = globKeys.map((g) => createGlobRegex(g));
@@ -216,11 +221,11 @@ export const fillUpdateCodes = (
         }
         //fallback cases
         if (isObject(srcValue)) {
-            mergeCodes[srcLabel] = mergeConf?.nested ?? UpdateCode.N;
+            mergeCodes[srcLabel] = deepConf.nested;
         } else if (isArrayOfAny(srcValue)) {
-            mergeCodes[srcLabel] = mergeConf?.vector ?? UpdateCode.XS;
+            mergeCodes[srcLabel] = deepConf.vector;
         } else {
-            mergeCodes[srcLabel] = mergeConf?.scalar ?? UpdateCode.B;
+            mergeCodes[srcLabel] = deepConf.scalar;
         }
     }
     //only exact labels for merge

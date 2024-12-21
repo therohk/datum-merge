@@ -8,6 +8,10 @@ describe("validate-merge-utils", () => {
         const lhsS = { y: "t", z: "t" };
         const rhsS = { x: "s", z: "s" };
 
+        expect(immutableMerge(lhsS, lhsS, UpdateCode.B)).toEqual(lhsS);
+        expect(immutableMerge({}, rhsS, UpdateCode.B)).toEqual(rhsS);
+        expect(immutableMerge(rhsS, {}, UpdateCode.B)).toEqual(rhsS);
+
         //scalar merge
         expect(immutableMerge(lhsS, rhsS, UpdateCode.B)).toEqual({ x: "s", y: "t", z: "s" });
         expect(immutableMerge(lhsS, rhsS, UpdateCode.U)).toEqual({ y: "t", z: "s" });
@@ -35,9 +39,11 @@ describe("validate-merge-utils", () => {
         const lhsCopy = deepClone(lhs);
         const rhsCopy = deepClone(rhs);
 
-        expect(immutableMerge(lhs, lhs, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
-        expect(immutableMerge(lhs, {}, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
-        expect(immutableMerge({}, lhs, UpdateCode.Y, UpdateCode.XR)).toMatchObject(lhs);
+        expect(immutableMerge(lhs, lhs, UpdateCode.Y, UpdateCode.XR)).toEqual(lhs);
+        expect(immutableMerge(lhs, {}, UpdateCode.Y, UpdateCode.XR)).toEqual(lhs);
+        expect(immutableMerge({}, lhs, UpdateCode.Y, UpdateCode.XR)).toEqual(lhs);
+        expect(immutableMerge({}, rhs, uc, UpdateCode.XS)).toEqual(rhs);
+        expect(immutableMerge(rhs, {}, uc, UpdateCode.XF)).toEqual(rhs);
 
         //vector set operations
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XM).a).toEqual(["11", "22", "33", "44"]);
@@ -58,7 +64,14 @@ describe("validate-merge-utils", () => {
         expect(immutableMerge(lhs, { tv: "t" }, uc, UpdateCode.XD).tv).toEqual(undefined);
         expect(immutableMerge(lhs, { tv: "s" }, uc, UpdateCode.XD).tv).toEqual(["t"]);
 
+        //blank into vector
+        expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XM).a).toEqual(lhs.a);
+        expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XI).a).toEqual(undefined);
+        expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XR).a).toEqual([]);
+        expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.Y).a).toEqual([]);
+
         //vector into empty
+        expect(immutableMerge({}, rhs, uc, UpdateCode.XM).sv).toEqual(["11", "22"]);
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XM).sv).toEqual(["11", "22"]);
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XD).sv).toEqual(undefined);
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XI).sv).toEqual(undefined);
@@ -83,16 +96,19 @@ describe("validate-merge-utils", () => {
         expect(immutableMerge(lhs, rhs, sc, vc).o).toMatchObject(rhs.o);
 
         //nested vector
-        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.N).o).toMatchObject(lhs.o);
-        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.Y).o).toMatchObject(rhs.o);
-        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.XM).o).toMatchObject({ a: ["11", "22", "33", "44"], b: "s", k: "t" });
+        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.N).o).toEqual(lhs.o);
+        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.Y).o).toEqual(rhs.o);
+        expect(immutableDeepMerge(lhs, rhs, sc, vc, UpdateCode.XM).o).toEqual({ a: ["11", "22", "33", "44"], b: "s", k: "t" });
 
         //nested object array
         const deepT = { oa: { v: [{ x: "a" }, { c: "z" }, { b: "v" }] }, o: { z: ["a", "b"], b: "t" }, del: "x" };
         const deepS = { oa: { v: [{ y: "b" }, { b: "v" }] }, o: { z: ["c"], b: "s" } };
+        const tCopy = deepClone(deepT);
+        const sCopy = deepClone(deepS);
 
-        expect(immutableDeepMerge(deepS, deepS, sc, UpdateCode.XM, UpdateCode.N)).toMatchObject(deepS);
+        expect(immutableDeepMerge(deepS, deepS, UpdateCode.B, UpdateCode.XM, UpdateCode.N)).toEqual(deepS);
         expect(immutableDeepMerge(deepT, deepS, UpdateCode.Y, UpdateCode.N, UpdateCode.XR)).toMatchObject(deepS);
+        expect(immutableDeepMerge(deepS, deepT, UpdateCode.Y, UpdateCode.Y, UpdateCode.Y)).toEqual(deepT);
 
         expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.XS, UpdateCode.N).oa.v.length).toBe(3);
         expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.XS, UpdateCode.Y).oa.v.length).toBe(2);
@@ -103,6 +119,9 @@ describe("validate-merge-utils", () => {
         expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.N, UpdateCode.XD).oa.v.length).toBe(2);
         expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.N, UpdateCode.XM).oa.v.length).toBe(4);
 
+        //no side effects
+        expect(tCopy).toMatchObject(deepT);
+        expect(sCopy).toMatchObject(deepS);
     });
 
 });

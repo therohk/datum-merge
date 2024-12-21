@@ -1,4 +1,3 @@
-
 import { deepClone, deepEquals } from "../src/datum-utils";
 import { Diff } from "../src/diff-lib/deep-diff";
 import { deepDiffLow, deepDiffTyped } from "../src/diff-high";
@@ -43,13 +42,20 @@ describe("validate-diff-utils", () => {
 
         const tsDiff: ReadonlyArray<Diff<any, any>> = deepDiffLow(trg, src, false) || [];
         const tsoiDiff: ReadonlyArray<Diff<any, any>> = deepDiffLow(trg, src, true) || [];
+        const stDiff: ReadonlyArray<Diff<any, any>> = deepDiffLow(src, trg, false) || [];
+        const stoiDiff: ReadonlyArray<Diff<any, any>> = deepDiffLow(src, trg, true) || [];
         expect(tsDiff).not.toMatchObject(tsoiDiff);
 
         const tsPatch = deepPatchLog(trg, src, false, true);
         const tsoiPatch = deepPatchLog(trg, src, true, true);
+        const stPatch = deepPatchLog(src, trg, false, false);
+        const stoiPatch = deepPatchLog(src, trg, true, false);
 
         expect(tsPatch.length).toEqual(tsDiff.length);
         expect(tsoiPatch.length).toEqual(tsoiDiff.length);
+        expect(stPatch.length).toEqual(stDiff.length);
+        expect(stoiPatch.length).toEqual(stoiDiff.length);
+
     });
 
 });
