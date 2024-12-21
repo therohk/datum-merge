@@ -122,7 +122,7 @@ export function customMerge<T extends TupleObj>(
             Object.assign(target, { ...source }); //bypass logic
             return delta;
     }
-    const mergeCodes = fillUpdateCodes(source, mergeConf, excludeKeys, false);
+    const mergeCodes = fillUpdateCodes(source, mergeConf, false, excludeKeys);
     if (emptyObject(mergeCodes)) {
         return false;
     }
@@ -165,8 +165,8 @@ export function immutableCustomMerge(
 export const fillUpdateCodes = (
     source: any,
     mergeConf: MergeConfig | MergeCode,
-    excludeKeys?: string[],
     blockUnset: boolean = false,
+    excludeKeys?: string[],
 ): DetailConfig => {
     if (isString(mergeConf)) {
         mergeConf = { scalar: mergeConf };
@@ -203,7 +203,7 @@ export const fillUpdateCodes = (
         }
         //handle nesting
         if (isObject(labelConf) && isObject(srcValue)) {
-            mergeCodes[srcLabel] = fillUpdateCodes(srcValue, labelConf, [], blockUnset);
+            mergeCodes[srcLabel] = fillUpdateCodes(srcValue, labelConf, blockUnset);
             //todo nested deletes ignored
             continue;
         }
@@ -215,7 +215,7 @@ export const fillUpdateCodes = (
                 mergeCodes[srcLabel] = globConf as MergeCode;
                 continue;
             } else if (isObject(srcValue)) {
-                mergeCodes[srcLabel] = fillUpdateCodes(srcValue, globConf!, [], blockUnset);
+                mergeCodes[srcLabel] = fillUpdateCodes(srcValue, globConf!, blockUnset);
                 continue;
             }
         }

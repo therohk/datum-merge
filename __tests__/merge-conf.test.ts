@@ -68,7 +68,7 @@ describe("validate-merge-conf", () => {
             ["ob*"]: { x: UpdateCode.B, y: UpdateCode.N, z: UpdateCode.XM },
             obv: UpdateCode.XM,
         };
-        expect(fillUpdateCodes(ucTest, {}, [], true)).toMatchObject({ e1: 'N', e2: 'N', e3: 'N', e4: 'XS' });
+        expect(fillUpdateCodes(ucTest, {}, true, [])).toMatchObject({ e1: 'N', e2: 'N', e3: 'N', e4: 'XS' });
         expect(fillUpdateCodes(ucTest, mergeConf)).toMatchObject({ obs: { x: 'B', y: 'N' }, obv: 'XM', obu: { z: 'XM' } });
 
         expect(immutableCustomMerge(ucTrg, ucTest, mergeConf)).toEqual({
