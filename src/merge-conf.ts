@@ -9,10 +9,10 @@ export type DetailConfig = {
 };
 
 export type MergeConfig = {
-    scalar?: MergeCode, //default
-    vector?: MergeCode, //array types
-    nested?: MergeCode, //object types 
-    [glob: string]: MergeCode | MergeConfig | undefined,
+    scalar?: MergeCode; //default
+    vector?: MergeCode; //array types
+    nested?: MergeCode; //object types 
+    [glob: string]: MergeCode | MergeConfig | undefined;
 };
 
 //-----------------------------------------------------------------------------
@@ -172,9 +172,9 @@ export const fillUpdateCodes = (
         mergeConf = { scalar: mergeConf };
     }
     const deepConf = {
-        scalar: mergeConf?.scalar ?? UpdateCode.B,
-        vector: mergeConf?.vector ?? UpdateCode.XS,
-        nested: mergeConf?.nested ?? UpdateCode.N,
+        scalar: mergeConf?.scalar || UpdateCode.B,
+        vector: mergeConf?.vector || UpdateCode.XS,
+        nested: mergeConf?.nested || UpdateCode.N,
     };
     const globKeys: string[] = getObjectKeys(mergeConf)
         .filter((s) => s.includes("*"));
@@ -203,7 +203,7 @@ export const fillUpdateCodes = (
         }
         //handle nesting
         if (isObject(labelConf) && isObject(srcValue)) {
-            mergeCodes[srcLabel] = fillUpdateCodes(srcValue, labelConf, blockUnset);
+            mergeCodes[srcLabel] = fillUpdateCodes(srcValue, { ...deepConf, ...labelConf }, blockUnset);
             //todo nested deletes ignored
             continue;
         }
@@ -216,7 +216,7 @@ export const fillUpdateCodes = (
                 continue;
             }
             if (isObject(globConf) && isObject(srcValue)) {
-                mergeCodes[srcLabel] = fillUpdateCodes(srcValue, globConf!, blockUnset);
+                mergeCodes[srcLabel] = fillUpdateCodes(srcValue, { ...deepConf, ...globConf! }, blockUnset);
                 continue;
             }
         }
