@@ -1,4 +1,3 @@
-// import { get, has, set, unset } from "lodash-es";
 import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lodash-es";
 import { emptyValue, isArrayOfAny, isNullish, typeOfValue } from "./type-utils";
 import { areArraysEqual, deepClone } from "./datum-utils";
@@ -32,7 +31,8 @@ export function mergeScalarField(
     mergeCode: MergeCode,
 ): boolean {
     const sourceHas = !isNullish(source[label]);
-    const targetHas = target.hasOwnProperty(label); //!isNullish(target[label]);
+    const targetKey = target.hasOwnProperty(label);
+    const targetHas = targetKey && !isNullish(target[label]);
     if (!targetHas && !sourceHas) {
         return false;
     }
@@ -50,8 +50,8 @@ export function mergeScalarField(
         case UpdateCode.N:
             return false;
         case UpdateCode.Y:
-            target[label] = source[label];
-            return true;
+            target[label] = deepClone(source[label]);
+            return true; //should bypass
         case UpdateCode.B:
             if (sourceHas) migrateVal = true;
             break;
@@ -82,7 +82,7 @@ export function mergeScalarField(
     target[label] = deepClone(source[label]);
     if (emptyValue(target[label])) {
         delete target[label];
-        return targetHas;
+        return targetKey;
     }
     return true;
 };
@@ -98,7 +98,8 @@ export function mergeVectorField(
         return false; //sourceHas
     }
     let sourceVec = isArrayOfAny(sourceVals);
-    const targetHas = target.hasOwnProperty(label);
+    const targetKey = target.hasOwnProperty(label);
+    const targetHas = targetKey && !isNullish(target[label]);
     const targetVec = isArrayOfAny(target[label]);
     if (targetHas && !targetVec) {
         //should T => T[] change be allowed  
@@ -115,9 +116,11 @@ export function mergeVectorField(
         case UpdateCode.N:
             return false;
         case UpdateCode.Y:
-        case UpdateCode.XR:
             target[label] = deepClone(sourceVals);
-            return true;
+            return true; //should bypass
+        case UpdateCode.XR:
+            targetVals = sourceVals;
+            break;
         // case UpdateCode.C:
         case UpdateCode.XS:
             targetVals = concat(target[label] ?? [], sourceVals);
@@ -142,12 +145,11 @@ export function mergeVectorField(
     }
     if (!targetVals?.length) {
         delete target[label];
-        return targetHas;
+        return targetKey;
     }
-
+    //array replaced
     const changed = !areArraysEqual(targetVals, target[label]);
     // && !deepEquals(targetVals, target[label]);
-    //always clone source objects?
-    target[label] = targetVals; //array replaced
+    target[label] = !changed ? targetVals : deepClone(targetVals);
     return changed;
 };

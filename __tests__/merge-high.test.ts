@@ -29,6 +29,13 @@ describe("validate-merge-utils", () => {
         expect(immutableMerge(lhsS, rhsS, UpdateCode.Y)).toEqual({ x: "s", y: "t", z: "s" });
         expect(immutableMerge(lhsS, rhsS, UpdateCode.N)).toEqual(lhsS);
 
+        //scalar type check
+        expect(() => { immutableMerge(lhsS, { y: 5 }, UpdateCode.B) }).toThrow();
+        // expect(() => { immutableMerge({ x: null }, rhsS, UpdateCode.B) }).toThrow();
+        // expect(() => { immutableMerge({ x: undefined }, rhsS, UpdateCode.B) }).toThrow();
+        expect(immutableMerge({ x: null }, rhsS, UpdateCode.B)).toEqual(rhsS);
+        expect(immutableMerge({ x: undefined }, rhsS, UpdateCode.B)).toEqual(rhsS);
+
     });
 
     test('should merge vector fields with update code', async () => {
@@ -67,7 +74,7 @@ describe("validate-merge-utils", () => {
         //blank into vector
         expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XM).a).toEqual(lhs.a);
         expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XI).a).toEqual(undefined);
-        expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XR).a).toEqual([]);
+        expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.XR).a).toEqual(undefined);
         expect(immutableMerge(lhs, { a: [] }, uc, UpdateCode.Y).a).toEqual([]);
 
         //vector into empty
@@ -78,6 +85,13 @@ describe("validate-merge-utils", () => {
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XR).sv).toEqual(rhs.sv);
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XS).sv).toEqual(rhs.sv);
         expect(immutableMerge(lhs, rhs, uc, UpdateCode.XF).sv).toEqual(rhs.sv);
+
+        //vector type check
+        expect(() => { immutableMerge(lhs, { ts: ["s1", "s2"] }, uc, UpdateCode.XM) }).toThrow();
+        // expect(() => { immutableMerge({ sv: null }, rhs, uc, UpdateCode.XM) }).toThrow();
+        // expect(() => { immutableMerge({ sv: undefined }, rhs, uc, UpdateCode.XM) }).toThrow();
+        expect(immutableMerge({ sv: null }, rhs, uc, UpdateCode.XF)).toEqual(rhs);
+        expect(immutableMerge({ sv: undefined }, rhs, uc, UpdateCode.XS)).toEqual(rhs);
 
         //no side effects
         expect(lhsCopy).toMatchObject(lhs);
