@@ -1,6 +1,6 @@
 {
 	"name": "datum-merge",
-	"version": "0.9.5",
+	"version": "0.9.7",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"license": "MIT",
 	"description": "Simplified diff and merging for deeply nested objects.",

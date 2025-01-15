@@ -2,13 +2,12 @@
 export type PrimitiveType = "string" | "number" | "boolean";
 export type Primitive = string | number | boolean;
 export type PrimitiveArray = string[] | number[] | boolean[];
-export type VectorArray = string[] | number[];
 
 export type ObjectKeys<T> = keyof T;
 export type ObjectVals<T> = T[keyof T];
 export type Prettify<T> = { [K in keyof T]: T[K]; } & {};
 
-export type SafeTypes = Primitive | VectorArray;
+export type SafeTypes = Primitive | PrimitiveArray;
 export type SafeTupleObj = { [label: string]: SafeTypes };
 export type TupleObj = { [label: string]: any };
 

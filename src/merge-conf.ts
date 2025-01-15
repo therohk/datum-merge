@@ -177,7 +177,8 @@ export const fillUpdateCodes = (
         nested: mergeConf?.nested || UpdateCode.N,
     };
     const globKeys: string[] = getObjectKeys(mergeConf)
-        .filter((s) => s.includes("*"));
+        .filter((s) => s.includes("*"))
+        .sort((s1, s2) => s2.length - s1.length); //prefer longest
     const globPats: RegExp[] = globKeys.map((g) => createGlobRegex(g));
 
     //iterate keys in source

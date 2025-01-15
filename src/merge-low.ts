@@ -1,5 +1,5 @@
 import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lodash-es";
-import { emptyValue, isArrayOfAny, isNullish, typeOfValue } from "./type-utils";
+import { emptyValue, isArrayOfAny, isNullish, isPrimitive, typeOfValue } from "./type-utils";
 import { areArraysEqual, deepClone } from "./datum-utils";
 
 export const UpdateCode = {
@@ -78,8 +78,9 @@ export function mergeScalarField(
     if (!migrateVal) {
         return false;
     }
-    // isPrimitive(source[label]); //avoid cloning
-    target[label] = deepClone(source[label]);
+    target[label] = !sourceHas || isPrimitive(source[label])
+        ? source[label]
+        : deepClone(source[label]);
     if (emptyValue(target[label])) {
         delete target[label];
         return targetKey;
