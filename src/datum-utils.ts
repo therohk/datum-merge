@@ -35,7 +35,7 @@ export function deepEqualsPath(lhs: any, rhs: any, atPath: string): boolean {
     return equal(get(lhs, atPath), get(rhs, atPath));
 }
 
-export function deepClone(val: any): any {
+export function deepClone<T = any>(val: T): T {
     return cloneDeep(val);
 }
 
@@ -66,12 +66,12 @@ export function areArraysEqual<T>(
 export function createGlobRegex(
     search: string
 ): RegExp {
-    let pattern = search.replace(/\*/g, ".+");
-    //pattern = search.replace(/\?/g, ".");
+    const pattern = search.replace(/\*/g, ".+");
+    //pattern = pattern.replace(/\?/g, ".");
     return new RegExp(`^${pattern}$`);
 }
 
-export function selectGlobKeys(
+export function getGlobKeys(
     obj: any,
     includePats: string[] = ["*"], //globs or labels
     excludeKeys?: string[],        //labels only
@@ -80,11 +80,29 @@ export function selectGlobKeys(
     if (!obj || !includePats?.length) {
         return includeKeys;
     }
-    const globPats = includePats.map((g) => createGlobRegex(g));
-    for (const label of getObjectKeys(obj, excludeKeys)) {
-        if (globPats.findIndex((r) => r.test(label)) >= 0) {
+    const labels: string[] = getObjectKeys(obj, excludeKeys);
+    if (!labels || !labels.length) {
+        return includeKeys;
+    }
+    const globPats = includePats.filter((s) => s.includes("*"))
+        .map((g) => createGlobRegex(g));
+    for (const label of labels) {
+        if (includePats.includes(label)) {
+            includeKeys.push(label);
+        } else if (globPats.findIndex((r) => r.test(label)) >= 0) {
             includeKeys.push(label);
         }
     }
     return includeKeys;
+}
+
+export function selectObjKeys<T extends { [key: string]: any }>(
+    obj: T,
+    includeKeys: string[],
+): Partial<T> {
+    if (!includeKeys?.length)
+        return { ...obj };
+    return Object.fromEntries(Object.entries(obj)
+        .filter(([k, _]) => includeKeys.includes(k))
+    ) as Partial<T>;
 }

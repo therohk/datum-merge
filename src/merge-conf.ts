@@ -1,5 +1,5 @@
 import { isArrayOfAny, emptyObject, isNullish, isObject, isString, TupleObj } from "./type-utils";
-import { createGlobRegex, deepClone, getObjectKeys } from "./datum-utils";
+import { createGlobRegex, deepClone, getObjectKeys, selectObjKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, MergeCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { updateCodeInfo } from "./merge-high";
@@ -11,7 +11,7 @@ export type DetailConfig = {
 export type MergeConfig = {
     scalar?: MergeCode; //default
     vector?: MergeCode; //array types
-    nested?: MergeCode; //object types 
+    nested?: MergeCode; //object types
     [glob: string]: MergeCode | MergeConfig | undefined;
 };
 
@@ -118,9 +118,7 @@ export function customMerge<T extends TupleObj>(
         case UpdateCode.N:
             return false;
         case UpdateCode.Y:
-            const delta = deepDiffTyped<Partial<T>>(target, source);
-            Object.assign(target, { ...source }); //bypass logic
-            return delta;
+            return bypassMerge(target, source);
     }
     const mergeCodes = fillUpdateCodes(source, mergeConf, false, excludeKeys);
     if (emptyObject(mergeCodes)) {
@@ -133,6 +131,25 @@ export function customMerge<T extends TupleObj>(
         return delta;
     }
     return false;
+}
+
+/**
+ * bypass merge using direct assignment
+ * behaves like shallow merge with code Y
+ * @returns diff or false if no changes
+ */
+export function bypassMerge<T extends TupleObj>(
+    target: T,
+    source: TupleObj,
+): Partial<T> | false {
+    if (emptyObject(source)) {
+        return false;
+    }
+    let delta = deepDiffTyped<T>(target, source as T, true);
+    Object.assign(target, { ...source }); //bypass logic
+    //only source fields in diff
+    delta = selectObjKeys(delta, getObjectKeys(source));
+    return emptyObject(delta) ? false : delta;
 }
 
 /**

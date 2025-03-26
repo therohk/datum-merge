@@ -1,7 +1,9 @@
 import { deepClone } from "../src/datum-utils";
 import { UpdateCode } from "../src/merge-low";
+import { deepDiffTyped } from "../src/diff-high";
+import { diffFromMerge, immutableDeepMerge } from "../src/merge-high";
 import { DetailConfig, immutableDetailMerge } from "../src/merge-conf";
-import { MergeConfig, fillUpdateCodes, immutableCustomMerge } from "../src/merge-conf";
+import { MergeConfig, bypassMerge, customMerge, fillUpdateCodes, immutableCustomMerge } from "../src/merge-conf";
 
 describe("validate-merge-conf", () => {
 
@@ -77,6 +79,18 @@ describe("validate-merge-conf", () => {
             pAt: "s", pAt2: 3, e3: {}, e4: [],
             obs: { x: 1 }, obv: [{ x: 2 }], obu: { y: "t", z: [3] },
         });
+
+        const yDiff1 = customMerge<any>(deepClone(ucTrg), ucTest, { scalar: "Y", vector: "Y", nested: "Y" });
+        const yDiff2 = customMerge<any>(deepClone(ucTrg), ucTest, { "*": UpdateCode.Y });
+        expect(yDiff1).toEqual(yDiff2);
+
+        const bDiff1 = bypassMerge(deepClone(ucTrg), ucTest);
+        const bDiff2 = diffFromMerge(ucTrg, ucTest, UpdateCode.Y, undefined, undefined, true);
+        const bDiff3 = deepDiffTyped(ucTrg, immutableDeepMerge(ucTrg, ucTest, UpdateCode.Y), true);
+        expect(bDiff1).toMatchObject(bDiff2);
+        expect(bDiff1).toMatchObject(bDiff3);
+        expect(bDiff1).toEqual({ ...yDiff2, e1: null, e2: undefined });
+
     });
 
 });
