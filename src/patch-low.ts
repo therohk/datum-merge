@@ -60,8 +60,10 @@ export function deepPatchLog(
 
 //-----------------------------------------------------------------------------
 
-function escapePathPart(path: string | number): string {
+function escapePathPart(path: PropertyKey): string {
     if (typeof path === 'number')
+        return path.toString();
+    if (typeof path === 'symbol')
         return path.toString();
     if (path.indexOf('/') === -1 && path.indexOf('~') === -1)
         return path;
@@ -72,7 +74,7 @@ function unescapePathPart(path: string): string {
     return path.replace(/~1/g, '/').replace(/~0/g, '~');
 }
 
-function asJsonPointer(path: string[]): string {
+function asJsonPointer(path: PropertyKey[]): string {
     return !path?.length ? ""
         : "/" + path.map((s) => escapePathPart(s)).join("/");
 }

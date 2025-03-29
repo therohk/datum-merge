@@ -9,7 +9,7 @@ export { diff };
 export { orderIndependentDiff };
 export { accumulateDiff };
 export { observableDiff };
-export { orderIndependentObservableDiff };
+export { orderIndependentDeepDiff };
 export { applyChange, revertChange };
 export { applyDiff }; //prefer merge
 
@@ -61,8 +61,8 @@ type Accumulator<LHS, RHS = LHS> = {
 
 type Observer<LHS, RHS = LHS> = (diff: Diff<LHS, RHS>) => void;
 
-type FieldKey = string | number | symbol;
-type FieldPath = FieldKey[];
+type PathKey = string | number | symbol;
+type DiffPath = PathKey[];
 type StackItem<LHS, RHS = LHS> = { lhs: LHS, rhs: RHS };
 
 const typeNormalizer: PreFilterObject<any, any> = {
@@ -85,7 +85,7 @@ function diff<LHS, RHS = LHS>(
     lhs: LHS,
     rhs: RHS,
     prefilter?: PreFilter<LHS, RHS>,
-): readonly Diff<LHS, RHS>[] {
+): readonly Diff<LHS, RHS>[] | undefined {
     const changes: Diff<LHS, RHS>[] = [];
     deepDiff(lhs, rhs, changes, prefilter);
     return changes?.length ? changes : undefined;
@@ -95,9 +95,8 @@ function orderIndependentDiff<LHS, RHS = LHS>(
     lhs: LHS,
     rhs: RHS,
     prefilter?: PreFilter<LHS, RHS>,
-): readonly Diff<LHS, RHS>[] {
-    const changes: Diff<LHS, RHS>[] = [];
-    deepDiff(lhs, rhs, changes, prefilter, null, null, null, true);
+): readonly Diff<LHS, RHS>[] | undefined {
+    const changes = observableDiff(lhs, rhs, undefined, prefilter, true);
     return changes?.length ? changes : undefined;
 }
 
@@ -109,7 +108,7 @@ function observableDiff<LHS, RHS = LHS>(
     orderIndependent?: boolean,
 ): Array<Diff<LHS, RHS>> {
     const changes: Diff<LHS, RHS>[] = [];
-    deepDiff(lhs, rhs, changes, prefilter, null, null, null, orderIndependent);
+    deepDiff(lhs, rhs, changes, prefilter, undefined, undefined, undefined, orderIndependent);
     if (observer) {
         changes.forEach((c) => observer(c));
     }
@@ -122,7 +121,7 @@ function accumulateDiff<LHS, RHS = LHS>(
     prefilter?: PreFilter<LHS, RHS>,
     accum?: Accumulator<LHS, RHS>,
     orderIndependent?: boolean,
-): Accumulator<LHS, RHS> | Diff<LHS, RHS>[] {
+): Accumulator<LHS, RHS> | Diff<LHS, RHS>[] | undefined {
     const observer = (accum) ?
         function (difference: Diff<LHS, RHS>) {
             if (difference) {
@@ -135,7 +134,7 @@ function accumulateDiff<LHS, RHS = LHS>(
 
 //-----------------------------------------------------------------------------
 
-function orderIndependentObservableDiff<LHS, RHS = LHS>(
+function orderIndependentDeepDiff<LHS, RHS = LHS>(
     lhs: LHS,
     rhs: RHS,
     changes: Array<Diff<LHS, RHS>>,
@@ -191,11 +190,11 @@ function deepDiff<LHS, RHS = LHS>(
     const ltype = typeof lhs;
     const rtype = typeof rhs;
     const ldefined = ltype !== 'undefined' ||
-        (stack && (stack.length > 0) && stack[stack.length - 1].lhs &&
-            Object.getOwnPropertyDescriptor(stack[stack.length - 1].lhs, key));
+        (stack && (stack.length > 0) && stack.at(-1).lhs &&
+            Object.getOwnPropertyDescriptor(stack.at(-1).lhs, key));
     const rdefined = rtype !== 'undefined' ||
-        (stack && (stack.length > 0) && stack[stack.length - 1].rhs &&
-            Object.getOwnPropertyDescriptor(stack[stack.length - 1].rhs, key));
+        (stack && (stack.length > 0) && stack.at(-1).rhs &&
+            Object.getOwnPropertyDescriptor(stack.at(-1).rhs, key));
 
     //simple cases
     if (!ldefined && rdefined) {
@@ -229,11 +228,10 @@ function deepDiff<LHS, RHS = LHS>(
             path: currentPath,
             lhs,
             rhs
-        } as DiffEdit<LHS, RHS>); new Date()
+        } as DiffEdit<LHS, RHS>);
     } else if (ltype === 'object' && lhs !== null && rhs !== null) {
-        let i: number, j: number;
         let other = false;
-        for (i = stack.length - 1; i > -1; --i) {
+        for (let i = stack.length - 1; i > -1; --i) {
             if (stack[i].lhs === lhs) {
                 other = true;
                 break;
@@ -242,8 +240,8 @@ function deepDiff<LHS, RHS = LHS>(
         if (!other) {
             stack.push({ lhs: lhs, rhs: rhs });
             if (Array.isArray(lhs) && Array.isArray(rhs)) {
-                i = rhs.length - 1;
-                j = lhs.length - 1;
+                let i = rhs.length - 1;
+                let j = lhs.length - 1;
                 // If order doesn't matter, we need to sort our arrays
                 if (orderIndependent) {
                     lhs = lhs.slice().sort(function (a, b) {
@@ -276,7 +274,7 @@ function deepDiff<LHS, RHS = LHS>(
             } else {
                 const akeys = [...Object.keys(lhs), ...Object.getOwnPropertySymbols(lhs)];
                 const pkeys = [...Object.keys(rhs), ...Object.getOwnPropertySymbols(rhs)];
-                for (i = 0; i < akeys.length; ++i) {
+                for (let i = 0; i < akeys.length; ++i) {
                     const k = akeys[i];
                     const ki = pkeys.indexOf(k);
                     if (ki >= 0) {
@@ -286,7 +284,7 @@ function deepDiff<LHS, RHS = LHS>(
                         deepDiff(lhs[k], undefined, changes, prefilter, currentPath, k, stack, orderIndependent);
                     }
                 }
-                for (i = 0; i < pkeys.length; ++i) {
+                for (let i = 0; i < pkeys.length; ++i) {
                     const k = pkeys[i];
                     if (k) {
                         deepDiff(undefined, rhs[k], changes, prefilter, currentPath, k, stack, orderIndependent);
@@ -295,7 +293,7 @@ function deepDiff<LHS, RHS = LHS>(
             }
             stack.pop();
         } else if ((lhs as any) !== (rhs as any)) {
-            // lhs is contains a cycle at this element and it differs from rhs
+            // lhs contains a cycle at this element and it differs from rhs
             changes.push({
                 kind: 'E',
                 path: currentPath,
@@ -323,11 +321,11 @@ function applyDiff<LHS, RHS = LHS>(
     filter?: Filter<LHS, RHS>,
 ): LHS {
     if (!target || !source) {
-        return;
+        return target;
     }
     const onChange = function (change: Diff<LHS, any>): void {
         if (!filter || filter(target, source, change)) {
-            applyChange(target, source, change);
+            applyChange(target, undefined, change);
         }
     };
     observableDiff(target, source, onChange);
@@ -336,7 +334,7 @@ function applyDiff<LHS, RHS = LHS>(
 
 function applyChange<LHS>(
     target: LHS,
-    source: any,
+    unused: any,
     change: Diff<LHS, any>,
 ): void {
     if (!target || !change || !change.kind) {
@@ -378,10 +376,10 @@ function applyArrayChange<LHS>(
     change: Diff<LHS, any>,
 ): any[] {
     if (change.path && change.path.length > 0) {
-        const u = change.path.length - 1;
+        const last = change.path.length - 1;
         let it = arr[index];
         let i: number;
-        for (i = 0; i < u; i++) {
+        for (i = 0; i < last; i++) {
             it = it[change.path[i]];
         }
         switch (change.kind) {
@@ -415,7 +413,7 @@ function applyArrayChange<LHS>(
 
 function revertChange<LHS>(
     target: LHS,
-    source: any,
+    unused: any,
     change: Diff<LHS, any>,
 ): void {
     if (!target || !change || !change.kind) {
@@ -460,10 +458,10 @@ function revertArrayChange<LHS>(
 ): any[] {
     if (change.path && change.path.length > 0) {
         // the structure of the object at the index has changed...
-        const u = change.path.length - 1;
+        const last = change.path.length - 1;
         let it = arr[index];
         let i: number;
-        for (i = 0; i < u; i++) {
+        for (i = 0; i < last; i++) {
             it = it[change.path[i]];
         }
         switch (change.kind) {
@@ -502,10 +500,7 @@ function revertArrayChange<LHS>(
 
 //-----------------------------------------------------------------------------
 
-function arrayRemove(
-    arr: any[],
-    index: number,
-): any[] {
+function arrayRemove(arr: any[], index: number): any[] {
     index = index < 0 ? arr.length + index : index;
     arr.splice(index, 1);
     return arr;
