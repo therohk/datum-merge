@@ -94,8 +94,8 @@ describe("validate-merge-utils", () => {
         expect(immutableMerge({ sv: undefined }, rhs, uc, UpdateCode.XS)).toEqual(rhs);
 
         //no side effects
-        expect(lhsCopy).toMatchObject(lhs);
-        expect(rhsCopy).toMatchObject(rhs);
+        expect(lhsCopy).toEqual(lhs);
+        expect(rhsCopy).toEqual(rhs);
 
     });
 
@@ -134,8 +134,8 @@ describe("validate-merge-utils", () => {
         expect(immutableDeepMerge(deepT, deepS, sc, UpdateCode.N, UpdateCode.XM).oa.v.length).toBe(4);
 
         //no side effects
-        expect(tCopy).toMatchObject(deepT);
-        expect(sCopy).toMatchObject(deepS);
+        expect(tCopy).toEqual(deepT);
+        expect(sCopy).toEqual(deepS);
     });
 
 });

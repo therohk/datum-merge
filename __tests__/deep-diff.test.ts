@@ -37,7 +37,7 @@ describe('validate-diff-lib', function () {
                         return;
                     }
                     it('shows differences when comparing ' + lhsTuple[0] + ' to ' + rhsTuple[0], function () {
-                        const changes = diff(lhsTuple[1], rhsTuple[1]);
+                        const changes: any = diff(lhsTuple[1], rhsTuple[1]);
                         expect(changes).toBeDefined();
                         expect(changes.length).toBe(1);
                         expect(changes[0]).toHaveProperty('kind');
@@ -89,7 +89,7 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property as removed when compared to an empty object', function () {
-            const changes = diff(lhs, empty);
+            const changes: any = diff(lhs, empty);
             expect(changes).toBeDefined();
             expect(changes.length).toBe(1);
             expect(changes[0]).toHaveProperty('kind');
@@ -97,7 +97,7 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property as edited when compared to an object with null', function () {
-            const changes = diff(lhs, {
+            const changes: any = diff(lhs, {
                 one: null
             });
             expect(changes).toBeDefined();
@@ -107,7 +107,7 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property as edited when compared to an array', function () {
-            const changes = diff(lhs, ['one']);
+            const changes: any = diff(lhs, ['one']);
             expect(changes).toBeDefined();
             expect(changes.length).toBe(1);
             expect(changes[0]).toHaveProperty('kind');
@@ -126,7 +126,7 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property as removed when compared to an empty object', function () {
-            const changes = diff(lhs, empty);
+            const changes: any = diff(lhs, empty);
             expect(changes).toBeDefined();
             expect(changes.length).toBe(1);
             expect(changes[0]).toHaveProperty('kind');
@@ -134,7 +134,7 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property is changed when compared to an object that has value', function () {
-            const changes = diff(lhs, {
+            const changes: any = diff(lhs, {
                 key: 'value'
             });
             expect(changes).toBeDefined();
@@ -147,7 +147,7 @@ describe('validate-diff-lib', function () {
             (lhs as any).key = {
                 nested: 'value'
             };
-            const changes = diff(lhs, {
+            const changes: any = diff(lhs, {
                 key: null
             });
             expect(changes).toBeDefined();
@@ -164,7 +164,7 @@ describe('validate-diff-lib', function () {
         };
 
         it('shows the property is changed with a new date value', function () {
-            const changes = diff(lhs, {
+            const changes: any = diff(lhs, {
                 key: new Date(777777777777)
             });
             expect(changes).toBeDefined();
@@ -181,7 +181,7 @@ describe('validate-diff-lib', function () {
         };
 
         it('shows the property is changed when compared to another number', function () {
-            const changes = diff(lhs, {
+            const changes: any = diff(lhs, {
                 key: 0
             });
             expect(changes).toBeDefined();
@@ -227,7 +227,7 @@ describe('validate-diff-lib', function () {
                 const prefilter = function (path, key) {
                     return key === 'supportedBy';
                 };
-                const changes = accumulateDiff(lhs, rhs, prefilter);
+                const changes: any = accumulateDiff(lhs, rhs, prefilter);
                 expect(changes).toBeDefined();
                 expect(changes.length).toBe(2);
                 expect(changes[0]).toHaveProperty('kind');
@@ -244,7 +244,7 @@ describe('validate-diff-lib', function () {
                 const prefilter = function (path, key) {
                     return key === 'supportedBy';
                 };
-                const changes = accumulateDiff(lhs, rhs, { prefilter: prefilter });
+                const changes: any = accumulateDiff(lhs, rhs, { prefilter: prefilter });
                 expect(changes).toBeDefined();
                 expect(changes.length).toBe(2);
                 expect(changes[0]).toHaveProperty('kind');
@@ -261,7 +261,7 @@ describe('validate-diff-lib', function () {
                 const prefilter = function (path, key) {
                     return key === 'fixedBy';
                 };
-                const changes = accumulateDiff(lhs, rhs, prefilter);
+                const changes: any = accumulateDiff(lhs, rhs, prefilter);
                 expect(changes).toBeDefined();
                 expect(changes.length).toBe(4);
                 expect(changes[0]).toHaveProperty('kind');
@@ -351,7 +351,7 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property as removed when compared to an empty object', function () {
-            const changes = accumulateDiff(nestedOne, empty);
+            const changes: any = accumulateDiff(nestedOne, empty);
             expect(changes).toBeDefined();
             expect(changes.length).toBe(3);
             expect(changes[0]).toHaveProperty('kind');
@@ -361,13 +361,13 @@ describe('validate-diff-lib', function () {
         });
 
         it('shows the property is changed when compared to an object that has value', function () {
-            const changes = diff(nestedOne, nestedTwo);
+            const changes: any = diff(nestedOne, nestedTwo);
             expect(changes).toBeDefined();
             expect(changes.length).toBe(3);
         });
 
         it('shows the property as added when compared to an empty object on left', function () {
-            const changes = diff(empty, nestedOne);
+            const changes: any = diff(empty, nestedOne);
             expect(changes).toBeDefined();
             expect(changes.length).toBe(3);
             expect(changes[0]).toHaveProperty('kind');
@@ -375,7 +375,7 @@ describe('validate-diff-lib', function () {
         });
 
         describe('when diff is applied to a different empty object', function () {
-            const changes = diff(nestedOne, nestedTwo);
+            const changes: any = diff(nestedOne, nestedTwo);
 
             it('has result with nested values', function () {
                 const result: any = {};
@@ -440,7 +440,7 @@ describe('validate-diff-lib', function () {
         };
 
         it('should not throw a TypeError', function () {
-            const changes = diff(lhs, rhs);
+            const changes: any = diff(lhs, rhs);
 
             expect(changes.length).toBe(1);
         });
@@ -482,7 +482,7 @@ describe('validate-diff-lib', function () {
         };
 
         describe('differences in nested arrays are detected', function () {
-            const changes = diff(lhs, rhs);
+            const changes: any = diff(lhs, rhs);
 
             // there should be differences
             expect(changes).toBeDefined();
@@ -504,12 +504,12 @@ describe('validate-diff-lib', function () {
         it('can apply diffs between two top level arrays', function () {
             const differences = diff(lhs, rhs);
 
-            differences.forEach(function (it) {
+            differences?.forEach(function (it) {
                 applyChange(lhs, true, it);
             });
             expect(lhs).toEqual(['a']);
 
-            differences.forEach(function (it) {
+            differences?.forEach(function (it) {
                 revertChange(lhs, true, it);
             });
             expect(lhs).toEqual(['a', 'a', 'a']);
@@ -757,37 +757,37 @@ describe('validate-diff-lib', function () {
             const lhs = [1, 2, 3];
             const rhs = [2, 2, 3];
 
-            const changes = orderIndependentDiff(lhs, rhs);
+            const changes: any = orderIndependentDiff(lhs, rhs);
             expect(changes.length).toBeDefined();
         });
 
     });
 
-});
+    describe('Diff-ing symbol-based keys should work', function () {
+        const lhs = {
+            [Symbol.iterator]: 'Iterator',
+            foo: 'bar'
+        };
+        const rhs = {
+            foo: 'baz'
+        };
 
-describe('Diff-ing symbol-based keys should work', function () {
-    const lhs = {
-        [Symbol.iterator]: 'Iterator',
-        foo: 'bar'
-    };
-    const rhs = {
-        foo: 'baz'
-    };
+        const changes = diff(lhs, rhs) ?? [];
+        expect(changes).toBeDefined();
+        expect(changes).toBeInstanceOf(Array);
+        expect(changes).toHaveLength(2);
 
-    const changes = diff(lhs, rhs);
-    expect(changes).toBeDefined();
-    expect(changes).toBeInstanceOf(Array);
-    expect(changes).toHaveLength(2);
-
-    let changed = 0, deleted = 0;
-    for (const difference of changes) {
-        if (difference.kind === 'D') {
-            deleted += 1;
-        } else if (difference.kind === 'E') {
-            changed += 1;
+        let changed = 0, deleted = 0;
+        for (const difference of changes) {
+            if (difference.kind === 'D') {
+                deleted += 1;
+            } else if (difference.kind === 'E') {
+                changed += 1;
+            }
         }
-    }
 
-    expect(changed).toBe(1);
-    expect(deleted).toBe(1);
+        expect(changed).toBe(1);
+        expect(deleted).toBe(1);
+    });
+
 });
