@@ -1,4 +1,4 @@
-import { PreFilterObject, accumulateDiff, applyChange, applyDiff, diff, getOrderIndependentHash, orderIndependentDiff, revertChange } from "../src/diff-lib/deep-diff";
+import { PreFilterFunction, PreFilterObject, accumulateDiff, applyChange, applyDiff, diff, getOrderIndependentHash, orderIndependentDiff, revertChange } from "../src/diff-lib/deep-diff";
 
 describe('validate-diff-lib', function () {
     const empty = {};
@@ -224,7 +224,7 @@ describe('validate-diff-lib', function () {
         describe('if the filtered property is an array', function () {
 
             it('changes to the array do not appear as a difference', function () {
-                const prefilter = function (path, key) {
+                const prefilter: PreFilterFunction = function (path, key) {
                     return key === 'supportedBy';
                 };
                 const changes: any = accumulateDiff(lhs, rhs, prefilter);
@@ -241,7 +241,7 @@ describe('validate-diff-lib', function () {
         describe('if the filtered config is passed as an object', function () {
 
             it('changes to the array to not appear as a difference', function () {
-                const prefilter = function (path, key) {
+                const prefilter: PreFilterFunction = function (path, key) {
                     return key === 'supportedBy';
                 };
                 const changes: any = accumulateDiff(lhs, rhs, { prefilter: prefilter });
@@ -258,7 +258,7 @@ describe('validate-diff-lib', function () {
         describe('if the filtered property is not an array', function () {
 
             it('changes do not appear as a difference', function () {
-                const prefilter = function (path, key) {
+                const prefilter: PreFilterFunction = function (path, key) {
                     return key === 'fixedBy';
                 };
                 const changes: any = accumulateDiff(lhs, rhs, prefilter);

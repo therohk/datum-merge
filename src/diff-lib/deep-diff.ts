@@ -4,6 +4,7 @@ export { type PreFilterFunction };
 export { type PreFilterObject };
 export { type Accumulator };
 export { type Observer };
+export { type DiffPath };
 
 export { diff };
 export { orderIndependentDiff };
@@ -19,26 +20,26 @@ export { getOrderIndependentHash };
 
 type DiffNew<RHS> = {
     readonly kind: "N";
-    readonly path?: any[];
+    readonly path: any[];
     readonly rhs: RHS;
 };
 
 type DiffDeleted<LHS> = {
     readonly kind: "D";
-    readonly path?: any[];
+    readonly path: any[];
     readonly lhs: LHS;
 };
 
 type DiffEdit<LHS, RHS = LHS> = {
     readonly kind: "E";
-    readonly path?: any[];
+    readonly path: any[];
     readonly lhs: LHS;
     readonly rhs: RHS;
 };
 
 type DiffArray<LHS, RHS = LHS> = {
     readonly kind: "A";
-    readonly path?: any[];
+    readonly path: any[];
     readonly index: number;
     readonly item: Diff<LHS, RHS>;
 };
@@ -183,10 +184,9 @@ function deepDiff<LHS, RHS = LHS>(
 
     // Use string comparison for regexes
     if (realTypeOf(lhs) === 'regexp' && realTypeOf(rhs) === 'regexp') {
-        lhs = lhs.toString() as LHS;
-        rhs = rhs.toString() as RHS;
+        lhs = (lhs as RegExp).toString() as LHS;
+        rhs = (rhs as RegExp).toString() as RHS;
     }
-
     const ltype = typeof lhs;
     const rtype = typeof rhs;
     const ldefined = ltype !== 'undefined' ||
@@ -229,7 +229,10 @@ function deepDiff<LHS, RHS = LHS>(
             lhs,
             rhs
         } as DiffEdit<LHS, RHS>);
-    } else if (ltype === 'object' && lhs !== null && rhs !== null) {
+        return;
+    }
+
+    if (ltype === 'object' && lhs !== null && rhs !== null) {
         let other = false;
         for (let i = stack.length - 1; i > -1; --i) {
             if (stack[i].lhs === lhs) {
@@ -240,24 +243,26 @@ function deepDiff<LHS, RHS = LHS>(
         if (!other) {
             stack.push({ lhs: lhs, rhs: rhs });
             if (Array.isArray(lhs) && Array.isArray(rhs)) {
-                let i = rhs.length - 1;
-                let j = lhs.length - 1;
+                let lArr = lhs as any[];
+                let rArr = rhs as any[];
                 // If order doesn't matter, we need to sort our arrays
                 if (orderIndependent) {
-                    lhs = lhs.slice().sort(function (a, b) {
+                    lArr = lArr.slice(0).sort(function (a, b) {
                         return getOrderIndependentHash(a) - getOrderIndependentHash(b);
-                    }) as LHS;
-                    rhs = rhs.slice().sort(function (a, b) {
+                    });
+                    rArr = rArr.slice(0).sort(function (a, b) {
                         return getOrderIndependentHash(a) - getOrderIndependentHash(b);
-                    }) as RHS;
+                    });
                 }
 
+                let i = rArr.length - 1;
+                let j = lArr.length - 1;
                 while (i > j) {
                     changes.push({
                         kind: 'A',
                         path: currentPath,
                         index: i,
-                        item: { kind: 'N', rhs: rhs[i--] } as DiffNew<RHS>,
+                        item: { kind: 'N', rhs: rArr[i--], path: undefined! } as DiffNew<RHS>,
                     } as DiffArray<LHS, RHS>);
                 }
                 while (j > i) {
@@ -265,29 +270,31 @@ function deepDiff<LHS, RHS = LHS>(
                         kind: 'A',
                         path: currentPath,
                         index: j,
-                        item: { kind: 'D', lhs: lhs[j--] } as DiffDeleted<LHS>,
+                        item: { kind: 'D', lhs: lArr[j--], path: undefined! } as DiffDeleted<LHS>,
                     } as DiffArray<LHS, RHS>);
                 }
                 for (; i >= 0; --i) {
-                    deepDiff(lhs[i], rhs[i], changes, prefilter, currentPath, i, stack, orderIndependent);
+                    deepDiff(lArr[i], rArr[i], changes, prefilter, currentPath, i, stack, orderIndependent);
                 }
             } else {
-                const akeys = [...Object.keys(lhs), ...Object.getOwnPropertySymbols(lhs)];
-                const pkeys = [...Object.keys(rhs), ...Object.getOwnPropertySymbols(rhs)];
+                const lObj = lhs as any;
+                const rObj = rhs as any;
+                const akeys = [...Object.keys(lObj), ...Object.getOwnPropertySymbols(lObj)];
+                const pkeys = [...Object.keys(rObj), ...Object.getOwnPropertySymbols(rObj)];
                 for (let i = 0; i < akeys.length; ++i) {
-                    const k = akeys[i];
+                    const k = akeys[i]!;
                     const ki = pkeys.indexOf(k);
                     if (ki >= 0) {
-                        deepDiff(lhs[k], rhs[k], changes, prefilter, currentPath, k, stack, orderIndependent);
-                        pkeys[ki] = null;
+                        deepDiff(lObj[k], rObj[k], changes, prefilter, currentPath, k, stack, orderIndependent);
+                        pkeys[ki] = null!;
                     } else {
-                        deepDiff(lhs[k], undefined, changes, prefilter, currentPath, k, stack, orderIndependent);
+                        deepDiff(lObj[k], undefined, changes, prefilter, currentPath, k, stack, orderIndependent);
                     }
                 }
                 for (let i = 0; i < pkeys.length; ++i) {
                     const k = pkeys[i];
                     if (k) {
-                        deepDiff(undefined, rhs[k], changes, prefilter, currentPath, k, stack, orderIndependent);
+                        deepDiff(undefined, rObj[k], changes, prefilter, currentPath, k, stack, orderIndependent);
                     }
                 }
             }
@@ -340,7 +347,7 @@ function applyChange<LHS>(
     if (!target || !change || !change.kind) {
         return;
     }
-    let it = target;
+    let it: any = target;
     const rootPath = !change.path?.length;
     const last = rootPath ? 0 : change.path.length - 1;
     let i = -1;
@@ -419,7 +426,7 @@ function revertChange<LHS>(
     if (!target || !change || !change.kind) {
         return;
     }
-    let it = target;
+    let it: any = target;
     const rootPath = !change.path?.length;
     const last = rootPath ? 0 : change.path.length - 1;
     let i: number;

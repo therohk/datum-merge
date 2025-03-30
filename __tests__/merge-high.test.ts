@@ -5,8 +5,8 @@ import { immutableDeepMerge, immutableMerge } from "../src/merge-high";
 describe("validate-merge-utils", () => {
 
     test('should merge scalar fields with update code', async () => {
-        const lhsS = { y: "t", z: "t" };
-        const rhsS = { x: "s", z: "s" };
+        const lhsS: any = { y: "t", z: "t" };
+        const rhsS: any = { x: "s", z: "s" };
 
         expect(immutableMerge(lhsS, lhsS, UpdateCode.B)).toEqual(lhsS);
         expect(immutableMerge({}, rhsS, UpdateCode.B)).toEqual(rhsS);
