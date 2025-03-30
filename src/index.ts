@@ -3,7 +3,7 @@ export { deepEquals } from "./datum-utils";
 export { deepClone } from "./datum-utils";
 
 export { deepDiffLow } from "./diff-high";
-export { deepDiffTyped } from "./diff-high";
+export { deepDiffTyped, antiDiffTyped } from "./diff-high";
 export { deepDiffFlat } from "./diff-high";
 export { flattenObject, unflattenObject } from "./diff-high";
 
@@ -21,6 +21,7 @@ export { detailMerge, immutableDetailMerge } from "./merge-conf";
 export { type MergeConfig } from "./merge-conf";
 export { fillUpdateCodes } from "./merge-conf";
 export { customMerge, immutableCustomMerge } from "./merge-conf";
+export { bypassMerge } from "./merge-conf";
 
 export { type PatchResult } from "./patch-low";
 export { diffToPatchLog, asLodashPath } from "./patch-low";
