@@ -4,8 +4,9 @@
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"license": "MIT",
 	"description": "Simplified diff and merging for deeply nested objects",
-	"keywords": ["merge", "diff", "compare", "patch", "update"],
+	"keywords": ["merge", "diff", "compare", "patch", "update", "similarity", "changelog"],
 	"main": "./dist/cjs/index.js",
+	"module": "./dist/esm/index.js",
 	"types": "./dist/dts/index.d.ts",
 	"exports": {
 		".": {
@@ -36,7 +37,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/therohk/datum-merge.git"
+		"url": "https://github.com/therohk/datum-merge"
 	},
 	"bugs": "https://github.com/therohk/datum-merge/issues",
 	"devDependencies": {
