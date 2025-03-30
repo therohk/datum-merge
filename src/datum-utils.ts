@@ -96,7 +96,7 @@ export function getGlobKeys(
     return includeKeys;
 }
 
-export function selectObjKeys<T extends { [key: string]: any }>(
+export function selectObjKeys<T extends object>(
     obj: T,
     includeKeys: string[],
 ): Partial<T> {

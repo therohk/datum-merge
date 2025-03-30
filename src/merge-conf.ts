@@ -1,4 +1,4 @@
-import { isArrayOfAny, emptyObject, isNullish, isObject, isString, TupleObj } from "./type-utils";
+import { isArrayOfAny, emptyObject, isNullish, isObject, isString } from "./type-utils";
 import { createGlobRegex, deepClone, getObjectKeys, selectObjKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, MergeCode, mergeScalarField, mergeVectorField } from "./merge-low";
@@ -78,7 +78,7 @@ export function immutableDetailMerge(
 /**
  * @returns list of mergeable keys for given config
  */
-export function selectDetailKeys(
+export function getDetailKeys(
     obj: any,
     mergeCodes: DetailConfig,
     excludeKeys?: string[],
@@ -103,7 +103,7 @@ export function selectDetailKeys(
  * merge structured data and return diff
  * @returns diff or false if no changes
  */
-export function customMerge<T extends TupleObj>(
+export function customMerge<T extends object>(
     target: T,
     source: Partial<T>,
     mergeConf: MergeConfig | MergeCode,
@@ -138,9 +138,9 @@ export function customMerge<T extends TupleObj>(
  * behaves like shallow merge with code Y
  * @returns diff or false if no changes
  */
-export function bypassMerge<T extends TupleObj>(
+export function bypassMerge<T extends object>(
     target: T,
-    source: TupleObj,
+    source: object,
 ): Partial<T> | false {
     if (emptyObject(source)) {
         return false;
