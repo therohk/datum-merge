@@ -11,6 +11,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/diff-lib
     permissions:
       contents: read
       id-token: write
@@ -19,8 +22,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.VERSION }}
-      - name: switchdir
-        run: cd src/diff-lib
       - name: setup-node
         uses: actions/setup-node@v4
         with:
