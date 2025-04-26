@@ -1,6 +1,6 @@
 {
 	"name": "datum-merge",
-	"version": "0.9.8",
+	"version": "0.9.9",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"license": "MIT",
 	"description": "Simplified diff and merging for deeply nested objects",
@@ -42,12 +42,12 @@
 	"bugs": "https://github.com/therohk/datum-merge/issues",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "5.62.0",
-		"@typescript-eslint/parser": "5.62.0",
+		"@typescript-eslint/eslint-plugin": "8.28.0",
+		"@typescript-eslint/parser": "8.28.0",
 		"@types/lodash": "^4.14.169",
 		"@types/lodash-es": "^4.17.12",
 		"@types/jest": "^29.5.2",
-		"eslint": "^8.0.1",
+		"eslint": "^8.57.1",
 		"prettier": "^3.1.0",
 		"npm-run-all2": "^6.2.0",
 		"dpdm": "^3.14.0",

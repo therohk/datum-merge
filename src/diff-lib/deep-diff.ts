@@ -190,11 +190,11 @@ function deepDiff<LHS, RHS = LHS>(
     const ltype = typeof lhs;
     const rtype = typeof rhs;
     const ldefined = ltype !== 'undefined' ||
-        (stack && (stack.length > 0) && stack.at(-1).lhs &&
-            Object.getOwnPropertyDescriptor(stack.at(-1).lhs, key));
+        (stack && (stack.length > 0) && stack[stack.length - 1].lhs &&
+            Object.getOwnPropertyDescriptor(stack[stack.length - 1].lhs, key));
     const rdefined = rtype !== 'undefined' ||
-        (stack && (stack.length > 0) && stack.at(-1).rhs &&
-            Object.getOwnPropertyDescriptor(stack.at(-1).rhs, key));
+        (stack && (stack.length > 0) && stack[stack.length - 1].rhs &&
+            Object.getOwnPropertyDescriptor(stack[stack.length - 1].rhs, key));
 
     //simple cases
     if (!ldefined && rdefined) {
