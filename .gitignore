@@ -9,6 +9,8 @@
 node_modules
 main.js
 dist
+src/diff-lib/node_modules
+src/diff-lib/dist-diff
 
 # Exclude sourcemaps
 *.map
