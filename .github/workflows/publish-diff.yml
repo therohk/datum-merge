@@ -30,6 +30,6 @@ jobs:
       - name: clean-build
         run: npm ci && npm run buildlib
       - name: npm-publish
-        run: echo 'no'
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
