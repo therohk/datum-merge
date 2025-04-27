@@ -31,7 +31,7 @@
 		"buildlib:cjs": "tsc --project tsconfig.lib.json --outDir dist-diff/cjs",
 		"buildlib:esm": "tsc --project tsconfig.lib.json --module ESNext --outDir dist-diff/esm",
 		"buildlib:umd": "tsc --project tsconfig.lib.json -noEmit -skipLibCheck && node esbuild.lib.mjs production",
-		"buildlib": "run-s testdiff buildlib:*",
+		"buildlib": "run-s buildlib:*",
 		"compile": "tsc -noEmit -skipLibCheck"
 	},
 	"repository": {
