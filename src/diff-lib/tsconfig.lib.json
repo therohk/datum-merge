@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist-dif/cjs",
+    "module": "CommonJS",
+    "target": "ES5",
+    "downlevelIteration": true,
+    // "importHelpers": true,
+  },
+  "include": ["deep-diff.ts"],
+}
