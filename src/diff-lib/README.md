@@ -1,3 +1,13 @@
+# datum-diff
+
+now published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
+works as a drop-in replacement for package [deep-diff](https://www.npmjs.com/package/deep-diff)
+
+```
+import { diff, Diff, applyChange } from "datum-merge";
+const simpleDiff: Diff[] = diff(target, source);
+for (const dif of simpleDiff) { applyChange(target, null, dif); }
+```
 
 ## sources
 
@@ -39,6 +49,6 @@ see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-docum
 * diff response should be immutable
 * general code upgrades and variable cleanup
 * avoid introducing any dependancies within module
-* publish only diff as a drop-in replacement package ( todo )
+* bundled package size is seven times smaller
 
 ---
