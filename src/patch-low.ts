@@ -1,4 +1,4 @@
-import { get, toPath } from "lodash-es";
+import { get, set, toPath, unset } from "lodash-es";
 import { Diff } from "./diff-lib/deep-diff";
 import { deepDiffLow } from "./diff-high";
 
@@ -12,7 +12,7 @@ export type PatchResult<T = any> = {
 /**
  * convert deep diff to json patch model
  * only requires add/replace/remove operations
- * can be used with any diff operation
+ * can be used with the result of any diff
  */
 export function diffToPatchLog(
     differences: readonly Diff<any, any>[],
@@ -46,6 +46,26 @@ export function diffToPatchLog(
         jsonPatch.forEach((p) => delete p.prev);
     }
     return jsonPatch;
+}
+
+/**
+ * reapply patch on a fresh target
+ */
+export function applyPatchLog(
+    patchLog: PatchResult[],
+    target: object = {},
+): object {
+    if (!patchLog)
+        return target;
+    for (const patchItem of patchLog) {
+        const difPath: string[] = asLodashPath(patchItem.path);
+        if (patchItem.op === "remove") {
+            unset(target, difPath);
+        } else {
+            set(target, difPath, patchItem.value);
+        }
+    }
+    return target;
 }
 
 export function deepPatchLog(
