@@ -58,15 +58,15 @@ const diff = customMerge(target, source, conf);
 
 ## Upcoming Features
 
-1. inline the [deep-diff](https://github.com/flitbit/diff) library which unmaintained and buggy. ([available](/src/diff-lib/README.md))
+1. publish [deep-diff](https://github.com/flitbit/diff) library as a standalone package. ([available](/src/diff-lib/README.md))
 
 2. formalize config schema for deeply nested objects (for v1).
 
 3. option to ignore errors for datatype mismatch during merge.
 
-4. support merging for top level arrays or primitives.
+4. support custom equality check within vector merge.
 
-5. accept a subset of [json-patch](https://jsonpatch.com/) operations for merge.
+5. support merging for top level arrays or primitives.
 
 Code contributions are welcome via issues and pull requests.
 
@@ -79,7 +79,7 @@ It decides whether a change to the value of the field is allowed during a merge 
 
 ### Strategy Codes
 
-The same field within a source and target object is represented by `s` and `t` respectively.
+The same field within a target and source object is represented by `t` and `s` respectively.
 Whether the strategy requires data to be present for the field, is shown by { 0=no, 1=yes, X=irrelavant }. 
 The value is migrated from the source field to the target field only if the predicate passes.
 
@@ -88,13 +88,13 @@ The value is migrated from the source field to the target field only if the pred
 | C | n/a | always create new instance |
 | T | n/a | touch datum ; empty merge |
 | N | `0` | reject any change ; skip merge |
-| Y | `sX & tX` | accept any change ; bypass merge |
-| B | `s1 & tX` | insert or update, no delete |
-| H | `s1 & t1` | update only if exists |
-| U | `sX & t1` | update or delete only, no insert |
-| I | `sX & t0` | insert only, no update or delete |
-| D | `s0 & tX` | delete only, no update or insert |
-| XR | `sX & tX` | full vector replacement |
+| Y | `tX & sX` | accept any change ; bypass merge |
+| B | `tX & s1` | insert or update, no delete |
+| H | `t1 & s1` | update only if exists |
+| U | `t1 & sX` | update or delete only, no insert |
+| I | `t0 & sX` | insert only, no update or delete |
+| D | `tX & s0` | delete only, no update or insert |
+| XR | `tX & sX` | full vector replacement |
 | XM | `t ∪ s`   | set union, vector merge |
 | XD | `t - s`   | set difference, delete given values |
 | XI | `t ∩ s`   | set intersection, delete missing values |

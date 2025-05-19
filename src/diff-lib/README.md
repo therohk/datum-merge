@@ -1,6 +1,7 @@
 # datum-diff
 
 now published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
+
 works as a drop-in replacement for package [deep-diff](https://www.npmjs.com/package/deep-diff)
 
 ```
