@@ -1,15 +1,3 @@
-# datum-diff
-
-now published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
-
-works as a drop-in replacement for package [deep-diff](https://www.npmjs.com/package/deep-diff)
-
-```
-import { diff, Diff, applyChange } from "datum-merge";
-const simpleDiff: Diff[] = diff(target, source);
-for (const dif of simpleDiff) { applyChange(target, null, dif); }
-```
-
 ## sources
 
 the source code of the [deep-diff](https://github.com/flitbit/diff) js library has been migrated to typescript .
@@ -42,6 +30,14 @@ const customDiff: Diff[] = accumulateDiff(target, source, prefilter, accum, orde
 ```
 
 see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-documentation) in the original library for detailed examples .
+
+## datum-diff
+
+module recently published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
+
+works as a drop-in replacement for the package [deep-diff](https://www.npmjs.com/package/deep-diff)
+
+simply use `datum-diff` instead of the `datum-merge` libary in the examples above .
 
 ## changes
 

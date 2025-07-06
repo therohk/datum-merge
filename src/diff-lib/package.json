@@ -1,6 +1,6 @@
 {
 	"name": "datum-diff",
-	"version": "0.9.1",
+	"version": "1.0.3",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"license": "MIT",
 	"description": "deep-diff js library rewritten in typescript",
