@@ -28,14 +28,11 @@
 		"pretty": "prettier -c ./src",
 		"scantask": "findstr /s /i todo src\\*.*",
 		"test": "jest",
-		"testone": "jest -i __tests__/unorg-checks.test.ts",
 		"build:dts": "tsc --outDir dist/dts --declaration --declarationMap --emitDeclarationOnly",
 		"build:cjs": "tsc --outDir dist/cjs",
 		"build:esm": "tsc --module ESNext --outDir dist/esm",
-		"build:umd": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"build": "run-s test build:*",
 		"compile": "tsc -noEmit -skipLibCheck",
-		"docs": "typedoc src/index.ts",
 		"cyccheck": "dpdm --exit-code circular:1 --no-tree ./src"
 	},
 	"repository": {
