@@ -1,6 +1,6 @@
 {
 	"name": "datum-merge",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"author": "Rohit Kulkarni <rohk@live.com>",
 	"license": "MIT",
 	"description": "Simplified diff and merging for deeply nested objects",
@@ -8,6 +8,7 @@
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/dts/index.d.ts",
+	"umd": "./dist/umd/datum-merge.min.js",
 	"exports": {
 		".": {
 			"types": "./dist/dts/index.d.ts",
@@ -31,6 +32,7 @@
 		"build:dts": "tsc --outDir dist/dts --declaration --declarationMap --emitDeclarationOnly",
 		"build:cjs": "tsc --outDir dist/cjs",
 		"build:esm": "tsc --module ESNext --outDir dist/esm",
+		"build:umd": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"build": "run-s test build:*",
 		"compile": "tsc -noEmit -skipLibCheck",
 		"cyccheck": "dpdm --exit-code circular:1 --no-tree ./src"
@@ -56,7 +58,8 @@
 		"ts-node": "^10.9.2",
 		"tslib": "2.4.0",
 		"typescript": "5.4.5",
-		"lodash": "^4.17.21"
+		"lodash": "^4.17.21",
+		"esbuild": "0.25.6"
 	},
 	"dependencies": {
 		"fast-deep-equal": "^3.1.3",

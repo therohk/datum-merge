@@ -29,6 +29,11 @@ import { Diff, accumulateDiff, PreFilter, Accumulator } from "datum-merge";
 const customDiff: Diff[] = accumulateDiff(target, source, prefilter, accum, orderIndep);
 ```
 
+or for usage on browser environments:
+```
+<script src="https://unpkg.com/datum-diff@1.0.3/dist-diff/umd/deep-diff.min.js"></script>
+```
+
 see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-documentation) in the original library for detailed examples .
 
 ## datum-diff
