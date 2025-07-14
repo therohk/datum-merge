@@ -51,6 +51,6 @@
 		"ts-node": "^10.9.2",
 		"tslib": "2.4.0",
 		"typescript": "5.4.5",
-		"esbuild": "0.14.47"
+		"esbuild": "0.25.6"
 	}
 }
