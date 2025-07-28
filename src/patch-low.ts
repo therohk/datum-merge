@@ -48,6 +48,16 @@ export function diffToPatchLog(
     return jsonPatch;
 }
 
+export function deepPatchLog(
+    lhsObj: { [key: string]: any }, //before
+    rhsObj: { [key: string]: any }, //after
+    orderInd: boolean = false,
+    storePrev: boolean = false,
+): PatchResult[] {
+    const differences = deepDiffLow(lhsObj, rhsObj, orderInd);
+    return !differences ? [] : diffToPatchLog(differences, storePrev);
+};
+
 /**
  * reapply patch on a fresh target
  */
@@ -68,15 +78,25 @@ export function applyPatchLog(
     return target;
 }
 
-export function deepPatchLog(
-    lhsObj: { [key: string]: any }, //before
-    rhsObj: { [key: string]: any }, //after
-    orderInd: boolean = false,
-    storePrev: boolean = false,
-): PatchResult[] {
-    const differences = deepDiffLow(lhsObj, rhsObj, orderInd);
-    return !differences ? [] : diffToPatchLog(differences, storePrev);
-};
+/**
+ * revert changes on the previous target
+ */
+export function revertPatchLog(
+    patchLog: PatchResult[],
+    target: object,
+): object {
+    if (!patchLog)
+        return target;
+    for (const patchItem of patchLog) {
+        const difPath: string[] = asLodashPath(patchItem.path);
+        if (patchItem.op === "add") {
+            unset(target, difPath);
+        } else {
+            set(target, difPath, patchItem.prev);
+        }
+    }
+    return target;
+}
 
 //-----------------------------------------------------------------------------
 
