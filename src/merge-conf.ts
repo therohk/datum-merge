@@ -175,8 +175,8 @@ export function immutableCustomMerge(
  * must be invoked before every detail merge
  * @param source immutable incoming object for merge
  * @param mergeConf merge strategy config for type
- * @param excludeKeys exclude specific keys from merge
  * @param blockUnset exclude nullish keys in source
+ * @param excludeKeys exclude specific keys from merge
  * @returns codes for every source key
  */
 export const fillUpdateCodes = (
