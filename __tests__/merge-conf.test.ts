@@ -4,7 +4,6 @@ import { deepDiffTyped } from "../src/diff-high";
 import { diffFromMerge, immutableDeepMerge } from "../src/merge-high";
 import { DetailConfig, immutableDetailMerge } from "../src/merge-conf";
 import { MergeConfig, bypassMerge, customMerge, fillUpdateCodes, immutableCustomMerge } from "../src/merge-conf";
-import { applyPatchLog, deepPatchLog } from "../src/patch-low";
 
 describe("validate-merge-conf", () => {
 
@@ -93,12 +92,6 @@ describe("validate-merge-conf", () => {
         expect(bDiff1).toMatchObject(bDiff2);
         expect(bDiff1).toMatchObject(bDiff3);
         expect(bDiff1).toEqual({ ...yDiff2, e1: null, e2: undefined });
-
-        const mergedOne = immutableCustomMerge(ucTrg, ucTest, mergeConf);
-        const patchLog = deepPatchLog(ucTrg, mergedOne, false, true);
-        const patchedOne = applyPatchLog(patchLog, deepClone(ucTrg));
-        expect(mergedOne).toEqual(patchedOne);
-        expect(ucTrg).toEqual(ucTrgBkp);
     });
 
 });

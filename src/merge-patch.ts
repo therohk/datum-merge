@@ -80,7 +80,7 @@ export function deepMergeLog(
     rhsObj: { [key: string]: any }, //after
     mergeCodes?: DetailConfig,
 ): MergeResult[] {
-    const mergeLog = deepPatchLog(lhsObj, rhsObj, true, true) as MergeResult[];
+    const mergeLog = deepPatchLog(lhsObj, rhsObj, false, true) as MergeResult[];
     if (!mergeLog?.length) {
         return [];
     }
@@ -92,16 +92,17 @@ export function deepMergeLog(
     };
     for (const patchItem of mergeLog) {
         const pathParts: string[] = asLodashPath(patchItem.path);
+        // patchItem.path = pathParts.join(".");
         patchItem.code = !mergeCodes
             ? opCodeMap[patchItem.op]
             : selectPathCode(mergeCodes, pathParts);
-        patchItem.path = pathParts.join(".");
     }
     return mergeLog;
 };
 
 /**
  * pick code applicable to current path
+ * @returns resolved code or N as error 
  */
 export function selectPathCode(
     mergeCodes: DetailConfig,
@@ -129,5 +130,5 @@ export function selectPathCode(
         // }
         currConf = partConf;
     }
-    return UpdateCode.N; //error
+    return UpdateCode.N;
 }
