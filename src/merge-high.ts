@@ -60,14 +60,15 @@ export function shallowMerge(
     let changed = false;
     for (const label of sourceKeys) {
         if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
-            //todo fails if target is not array
+            //fails if target is not array
             if (mergeVectorField(target, source, label, vectorCode ?? scalarCode)) {
                 changed = true;
             }
             continue;
         }
-        if (mergeScalarField(target, source, label, scalarCode))
+        if (mergeScalarField(target, source, label, scalarCode)) {
             changed = true;
+        }
     }
     return changed;
 }
@@ -109,9 +110,7 @@ export function deepMerge(
     let changed = false;
     for (const label of sourceKeys) {
         if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
-            if (mergeVectorField(target, source, label, vectorCode)) {
-                changed = true;
-            }
+            changed = mergeVectorField(target, source, label, vectorCode) || changed;
             continue;
         }
         //recursive call for objects
@@ -120,22 +119,16 @@ export function deepMerge(
             if (nestedCode === UpdateCode.N)
                 continue;
             if (nestedCode === UpdateCode.Y) {
-                if (mergeScalarField(target, source, label, scalarCode))
-                    changed = true;
+                changed = mergeScalarField(target, source, label, scalarCode) || changed;
                 continue;
             }
-            if (deepMerge(target[label], source[label],
+            changed = deepMerge(target[label], source[label],
                 nestedCode.startsWith("X") ? scalarCode : nestedCode,
                 nestedCode.startsWith("X") ? nestedCode : vectorCode,
-                nestedCode
-            )) {
-                changed = true;
-            }
+                nestedCode) || changed;
             continue;
         }
-        if (mergeScalarField(target, source, label, scalarCode)) {
-            changed = true;
-        }
+        changed = mergeScalarField(target, source, label, scalarCode) || changed;
     }
     return changed;
 }
