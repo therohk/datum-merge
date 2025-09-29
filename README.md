@@ -52,7 +52,18 @@ const conf: MergeConfig = {
         vector: UpdateCode.XM,
     },
 };
-const diff = customMerge(target, source, conf);
+const diff: Partial<T> = customMerge<T>(target, source, conf);
+```
+
+Deep merge with diff response in json-patch format:
+```
+import { customMergePatch, MergeResult, revertPatchLog } from "datum-merge";
+const conf = { scalar: "I", vector: "XM", nested: "B" };
+const patch: MergeResult[] = customMergePatch(target, source, conf);
+revertPatchLog(patch, target);
+applyPatchLog(patch, anotherTarget);
+//with legacy diff
+const pdiff = diffToPatchLog(diff(target, source), true);
 ```
 ---
 
