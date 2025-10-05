@@ -55,21 +55,19 @@ const conf: MergeConfig = {
 const diff: Partial<T> = customMerge<T>(target, source, conf);
 ```
 
-Deep merge with diff response in json-patch format:
+Reversible deep merge with changelog in json-patch format:
 ```
 import { customMergePatch, MergeResult, revertPatchLog } from "datum-merge";
 const conf = { scalar: "I", vector: "XM", nested: "B" };
 const patch: MergeResult[] = customMergePatch(target, source, conf);
-revertPatchLog(patch, target);
+const changed = revertPatchLog(patch, target);
 applyPatchLog(patch, anotherTarget);
-//with legacy diff
-const pdiff = diffToPatchLog(diff(target, source), true);
 ```
 ---
 
 ## Upcoming Features
 
-1. publish [deep-diff](https://github.com/flitbit/diff) library as a standalone package. ([available](/src/diff-lib/README.md))
+1. publish diff module as a standalone package ([available](/src/diff-lib/README.md)).
 
 2. formalize config schema for deeply nested objects (for v1).
 
@@ -78,6 +76,8 @@ const pdiff = diffToPatchLog(diff(target, source), true);
 4. support custom equality check within vector merge.
 
 5. support merging for top level arrays or primitives.
+
+6. better anti-diff function that retains deep similarities.
 
 Code contributions are welcome via issues and pull requests.
 
@@ -121,6 +121,6 @@ Applying the merge results in one of these transitions per primitive value in th
 | `add`     | new / insert   | I | `null <-- non-null` |
 | `replace` | edit / update  | H | `non-null <-- non-null` |
 | `remove`  | unset / delete | D | `non-null <-- null` |
-| `test`    | noop / skip / ignore (tbd) | N | `null <-- null` or `non-null == non-null` |
+| `test`    | noop / skip / ignore | N | `null <-- null` or `non-null == non-null` |
 
 ---

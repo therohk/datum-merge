@@ -29,9 +29,11 @@ import { Diff, accumulateDiff, PreFilter, Accumulator } from "datum-merge";
 const customDiff: Diff[] = accumulateDiff(target, source, prefilter, accum, orderIndep);
 ```
 
-or for usage on browser environments:
+or interface to json-patch from the native diff output :
 ```
-<script src="https://unpkg.com/datum-diff@1.0.3/dist-diff/umd/deep-diff.min.js"></script>
+import { applyPatchLog, diffToPatchLog, PatchResult } from "datum-merge";
+const patch: PatchResult[] = diffToPatchLog(customDiff, true);
+applyPatchLog(patch, target);
 ```
 
 see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-documentation) in the original library for detailed examples .
@@ -43,6 +45,11 @@ module recently published as a standalone package [datum-diff](https://www.npmjs
 works as a drop-in replacement for the package [deep-diff](https://www.npmjs.com/package/deep-diff)
 
 simply use `datum-diff` instead of the `datum-merge` libary in the examples above .
+
+for usage on browser environments:
+```
+<script src="https://unpkg.com/datum-diff@1.0.3/dist-diff/umd/deep-diff.min.js"></script>
+```
 
 ## changes
 

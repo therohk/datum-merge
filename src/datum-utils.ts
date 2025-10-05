@@ -28,6 +28,8 @@ export function createValueKeys<T>(
 }
 
 export function deepEquals(lhs: any, rhs: any): boolean {
+    if (lhs === rhs)
+        return true;
     return equal(lhs, rhs);
 }
 
