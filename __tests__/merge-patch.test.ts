@@ -2,7 +2,7 @@ import { deepClone } from "../src/datum-utils";
 import { UpdateCode } from "../src/merge-low";
 import { MergeConfig, immutableCustomMerge } from "../src/merge-conf";
 import { bypassMergePatch, customMergePatch } from "../src/merge-patch";
-import { applyPatchLog, deepPatchLog, revertPatchLog } from "../src/patch-low";
+import { deepPatchLog, immutablePatch } from "../src/patch-low";
 
 describe("validate-merge-patch", () => {
 
@@ -62,9 +62,9 @@ describe("validate-merge-patch", () => {
         const mergedOne = immutableCustomMerge(ucTrg, ucSrc, mc);
         const patchLog = deepPatchLog(ucTrg, mergedOne, false, true);
 
-        const patchedOne = applyPatchLog(patchLog, deepClone(ucTrg));
-        const unpatchedOne = revertPatchLog(patchLog, deepClone(patchedOne));
-        const unpatchedTwo = revertPatchLog(patchLog, deepClone(mergedOne));
+        const patchedOne = immutablePatch(ucTrg, patchLog, "apply");
+        const unpatchedOne = immutablePatch(patchedOne, patchLog, "revert");
+        const unpatchedTwo = immutablePatch(mergedOne, patchLog, "revert");
 
         expect(patchedOne).toEqual(mergedOne);
         expect(unpatchedOne).toEqual(ucTrg);
@@ -78,8 +78,8 @@ describe("validate-merge-patch", () => {
         const target3 = deepClone(ucTrg);
         const merged3 = customMergePatch<any>(target3, ucSrc, mc, []) || [];
         expect(target3).not.toEqual(ucTrg);
-        expect(revertPatchLog(merged3, deepClone(target3))).toEqual(ucTrg);
-        expect(applyPatchLog(merged3, deepClone(ucTrg))).toEqual(target3);
+        expect(immutablePatch(target3, merged3, "revert")).toEqual(ucTrg);
+        expect(immutablePatch(ucTrg, merged3, "apply")).toEqual(target3);
 
     });
 

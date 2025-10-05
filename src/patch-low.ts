@@ -1,4 +1,5 @@
 import { get, set, toPath, unset } from "lodash-es";
+import { deepClone, deepEquals } from "./datum-utils";
 import { Diff } from "./diff-lib/deep-diff";
 import { deepDiffLow } from "./diff-high";
 
@@ -63,19 +64,26 @@ export function deepPatchLog(
  */
 export function applyPatchLog(
     patchLog: PatchResult[],
-    target: object = {},
-): object {
-    if (!patchLog)
-        return target;
+    target: object,
+): boolean {
+    if (!target || !patchLog?.length)
+        return false;
+    let changed = false;
     for (const patchItem of patchLog) {
         const difPath: string[] = asLodashPath(patchItem.path);
         if (patchItem.op === "remove") {
-            unset(target, difPath);
-        } else {
+            changed = unset(target, difPath) || changed;
+            continue;
+        }
+        const targetVal = get(target, difPath);
+        if (!targetVal && !patchItem.value)
+            continue;
+        if (!targetVal || !deepEquals(targetVal, patchItem.value)) {
             set(target, difPath, patchItem.value);
+            changed = true;
         }
     }
-    return target;
+    return changed;
 }
 
 /**
@@ -84,19 +92,35 @@ export function applyPatchLog(
 export function revertPatchLog(
     patchLog: PatchResult[],
     target: object,
-): object {
-    if (!patchLog)
-        return target;
+): boolean {
+    if (!target || !patchLog?.length)
+        return false;
+    let changed = false;
     for (const patchItem of patchLog) {
         const difPath: string[] = asLodashPath(patchItem.path);
         if (patchItem.op === "add") {
-            unset(target, difPath);
+            changed = unset(target, difPath) || changed;
         } else {
             set(target, difPath, patchItem.prev);
+            changed = true;
         }
     }
-    return target;
+    return changed;
 }
+
+export function immutablePatch(
+    target: object,
+    patchSrc: PatchResult[],
+    patchDir?: "apply" | "revert",
+): object {
+    const targetCopy = deepClone(target ?? {});
+    if (patchDir === "revert") {
+        revertPatchLog(patchSrc, targetCopy);
+    } else {
+        applyPatchLog(patchSrc, targetCopy);
+    }
+    return targetCopy;
+};
 
 //-----------------------------------------------------------------------------
 
@@ -127,7 +151,7 @@ export function asLodashPath(pointer: string): string[] {
     return !parts?.length ? [] : toPath(parts.join("."));
 }
 
-export function getValueByPointer(document: any, pointer: string): any {
+export function getPointerValue(document: any, pointer: string): any {
     return pointer === "" ? document
         : get(document, asLodashPath(pointer));
 }
