@@ -5,7 +5,7 @@ import { deepDiffLow } from "./diff-high";
 
 export type PatchResult<T = any> = {
     path: string;
-    op: "add" | "remove" | "replace";
+    op: "add" | "remove" | "replace" | "test";
     value?: Readonly<T>;
     prev?: any;
 };
@@ -71,6 +71,8 @@ export function applyPatchLog(
     let changed = false;
     for (const patchItem of patchLog) {
         const difPath: string[] = asLodashPath(patchItem.path);
+        if (patchItem.op === "test")
+            continue;
         if (patchItem.op === "remove") {
             changed = unset(target, difPath) || changed;
             continue;
@@ -100,7 +102,7 @@ export function revertPatchLog(
         const difPath: string[] = asLodashPath(patchItem.path);
         if (patchItem.op === "add") {
             changed = unset(target, difPath) || changed;
-        } else {
+        } else if (patchItem.op !== "test") {
             set(target, difPath, patchItem.prev);
             changed = true;
         }
