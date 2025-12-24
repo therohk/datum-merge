@@ -1,5 +1,5 @@
 import { isArrayOfAny, emptyObject, isNullish, isObject, isString } from "./type-utils";
-import { createGlobRegex, deepClone, getObjectKeys, selectObjKeys } from "./datum-utils";
+import { deepClone, fastGlobMatch, getObjectKeys, selectObjKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, MergeCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { updateCodeInfo } from "./merge-high";
@@ -196,7 +196,6 @@ export const fillUpdateCodes = (
     const globKeys: string[] = getObjectKeys(mergeConf)
         .filter((s) => s.includes("*"))
         .sort((s1, s2) => s2.length - s1.length); //prefer longest
-    const globPats: RegExp[] = globKeys.map((g) => createGlobRegex(g));
 
     //iterate keys in source
     const mergeCodes: DetailConfig = {};
@@ -226,7 +225,7 @@ export const fillUpdateCodes = (
             continue;
         }
         //handle globs
-        const globIndex = globPats.findIndex((r) => r.test(srcLabel));
+        const globIndex = globKeys.findIndex((g) => fastGlobMatch(g, srcLabel));
         if (globIndex >= 0) {
             const globConf = mergeConf[globKeys[globIndex]!];
             if (isString(globConf)) {

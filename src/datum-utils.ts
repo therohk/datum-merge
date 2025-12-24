@@ -65,37 +65,44 @@ export function areArraysEqual<T>(
 
 //-----------------------------------------------------------------------------
 
-export function createGlobRegex(
-    search: string
-): RegExp {
-    const pattern = search.replace(/\*/g, ".+");
-    //pattern = pattern.replace(/\?/g, ".");
-    return new RegExp(`^${pattern}$`);
+export function fastGlobMatch(
+    glob: string,
+    text: string,
+): boolean {
+    if (!glob.includes("*"))
+        return text === glob;
+    if (glob === "*")
+        return typeof text === "string";
+    const globParts: string[] = glob.split(/\*+/g, -1);
+    const partsLen = globParts.length;
+    if (partsLen === 0)
+        return !text;
+    if (partsLen === 1)
+        return text === globParts[0];
+    if (!text.startsWith(globParts[0]!))
+        return false;
+    let textIdx = globParts[0]!.length;
+    for (let i = 1; i < partsLen - 1; i++) {
+        const nextIdx = text.indexOf(globParts[i]!, textIdx);
+        if (nextIdx < 0) {
+            return false;
+        }
+        textIdx = nextIdx + globParts[i]!.length;
+        continue;
+    }
+    if (!text.endsWith(globParts[partsLen - 1]!))
+        return false;
+    return true;
 }
 
 export function getGlobKeys(
     obj: any,
-    includePats: string[] = ["*"], //globs or labels
-    excludeKeys?: string[],        //labels only
+    inclPats: string[] = ["*"],
+    exclPats?: string[],
 ): string[] {
-    const includeKeys: string[] = [];
-    if (!obj || !includePats?.length) {
-        return includeKeys;
-    }
-    const labels: string[] = getObjectKeys(obj, excludeKeys);
-    if (!labels || !labels.length) {
-        return includeKeys;
-    }
-    const globPats = includePats.filter((s) => s.includes("*"))
-        .map((g) => createGlobRegex(g));
-    for (const label of labels) {
-        if (includePats.includes(label)) {
-            includeKeys.push(label);
-        } else if (globPats.findIndex((r) => r.test(label)) >= 0) {
-            includeKeys.push(label);
-        }
-    }
-    return includeKeys;
+    return Object.keys(obj)
+        .filter((k) => !inclPats || inclPats.some((g) => fastGlobMatch(g, k)))
+        .filter((k) => !exclPats?.length || !exclPats.some((g) => fastGlobMatch(g, k)));
 }
 
 export function selectObjKeys<T extends object>(
