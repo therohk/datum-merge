@@ -41,8 +41,8 @@
 	"bugs": "https://github.com/therohk/datum-merge/issues",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "8.28.0",
-		"@typescript-eslint/parser": "8.28.0",
+		"@typescript-eslint/eslint-plugin": "8.53.1",
+		"@typescript-eslint/parser": "8.53.1",
 		"@types/jest": "^29.5.2",
 		"eslint": "^8.57.1",
 		"npm-run-all2": "^6.2.0",
