@@ -6,11 +6,6 @@ describe("validate-utils", () => {
 
     test('should validate type utils', async () => {
 
-        expect(!"").toBe(true);
-        expect(![]).toBe(false);
-        expect(![].length).toBe(true);
-        expect(!{}).toBe(false);
-
         expect(isObject({})).toBe(true);
         expect(isObject([])).toBe(false);
         expect(isObject([[], []])).toBe(false);
