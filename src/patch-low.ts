@@ -1,4 +1,5 @@
 import { get, set, toPath, unset } from "lodash-es";
+import { isNullish, isPrimitive } from "./type-utils";
 import { deepClone, deepEquals } from "./datum-utils";
 import { Diff } from "./diff-lib/deep-diff";
 import { deepDiffLow } from "./diff-high";
@@ -60,6 +61,7 @@ export function deepPatchLog(
 };
 
 /**
+ * subset of standard json patch format
  * reapply patch on a fresh target
  */
 export function applyPatchLog(
@@ -78,10 +80,11 @@ export function applyPatchLog(
             continue;
         }
         const targetVal = get(target, difPath);
-        if (!targetVal && !patchItem.value)
+        const sourceVal = patchItem.value;
+        if (isNullish(targetVal) && isNullish(sourceVal))
             continue;
-        if (!targetVal || !deepEquals(targetVal, patchItem.value)) {
-            set(target, difPath, patchItem.value);
+        if (isNullish(targetVal) || !deepEquals(targetVal, sourceVal)) {
+            set(target, difPath, deepClone(sourceVal));
             changed = true;
         }
     }
@@ -100,24 +103,49 @@ export function revertPatchLog(
     let changed = false;
     for (const patchItem of patchLog) {
         const difPath: string[] = asLodashPath(patchItem.path);
+        if (patchItem.op === "test")
+            continue;
         if (patchItem.op === "add") {
             changed = unset(target, difPath) || changed;
-        } else if (patchItem.op !== "test") {
-            set(target, difPath, patchItem.prev);
-            changed = true;
+            continue;
         }
+        set(target, difPath, patchItem.prev);
+        changed = true;
     }
     return changed;
+}
+
+/**
+ * unofficial json merge-patch format 
+ * op is ignored and nulls are removed
+ */
+export function forcePatchLog(
+    patchLog: { path: string, value?: unknown }[],
+    target: object = {},
+): void {
+    for (const patchItem of patchLog) {
+        const path: string[] = asLodashPath(patchItem.path);
+        const value = patchItem.value;
+        if (isNullish(value)) {
+            unset(target, path);
+        } if (isPrimitive(value)) {
+            set(target, path, value);
+        } else {
+            set(target, path, deepClone(value));
+        }
+    }
 }
 
 export function immutablePatch(
     target: object,
     patchSrc: PatchResult[],
-    patchDir?: "apply" | "revert",
+    patchDir?: "apply" | "revert" | "force",
 ): object {
     const targetCopy = deepClone(target ?? {});
     if (patchDir === "revert") {
         revertPatchLog(patchSrc, targetCopy);
+    } else if (patchDir === "force") {
+        forcePatchLog(patchSrc, targetCopy);
     } else {
         applyPatchLog(patchSrc, targetCopy);
     }
