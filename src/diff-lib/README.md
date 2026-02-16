@@ -1,11 +1,26 @@
+# datum-diff
+
+module recently published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
+
+works as a drop-in replacement for the deprecated package [deep-diff](https://www.npmjs.com/package/deep-diff)
+
+simply use `datum-diff` instead of the `datum-merge` libary in the examples below .
+
+for usage on browser environments:
+```
+<script src="https://unpkg.com/datum-diff@1.0.3/dist-diff/umd/deep-diff.min.js"></script>
+```
+
 ## sources
 
-the source code of the [deep-diff](https://github.com/flitbit/diff) js library has been migrated to typescript .
+the source code of the [deep-diff](https://www.npmjs.com/package/deep-diff) js library has been migrated to typescript .
 it remains unmaintained and contains some serious bugs that made it unreliable for this project . 
 
-* tag:v1.0.2 [flitbit/diff](https://github.com/flitbit/diff/blob/master/index.js)
-* tag:v1.0.2 [flitbit/diff/tests](https://github.com/flitbit/diff/blob/master/test/tests.js) 
+* tag:v1.0.2 flitbit/diff (was github.com/flitbit/diff/blob/master/index.js)
+* tag:v1.0.2 flitbit/diff/tests (was github.com/flitbit/diff/blob/master/test/tests.js)
 * tag:v1.0.5 [@types/deep-diff](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/deep-diff/index.d.ts)
+* tag:v1.0.2 flitbit/Readme.md (was github.com/flitbit/diff/blob/master/Readme.md)
+* as of 2026 the links to the original github library are no longer working
 
 same interfaces have been exposed to maintain compatibility with the last version .
 
@@ -36,20 +51,7 @@ const patch: PatchResult[] = diffToPatchLog(customDiff, true);
 applyPatchLog(patch, target);
 ```
 
-see the [readme](https://github.com/flitbit/diff/blob/master/Readme.md#api-documentation) in the original library for detailed examples .
-
-## datum-diff
-
-module recently published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
-
-works as a drop-in replacement for the package [deep-diff](https://www.npmjs.com/package/deep-diff)
-
-simply use `datum-diff` instead of the `datum-merge` libary in the examples above .
-
-for usage on browser environments:
-```
-<script src="https://unpkg.com/datum-diff@1.0.3/dist-diff/umd/deep-diff.min.js"></script>
-```
+see the [readme](dd-README.md) migrated from the original library for detailed examples .
 
 ## changes
 
