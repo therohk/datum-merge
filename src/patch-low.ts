@@ -124,14 +124,17 @@ export function forcePatchLog(
     target: object = {},
 ): void {
     for (const patchItem of patchLog) {
-        const path: string[] = asLodashPath(patchItem.path);
+        const difPath: string[] = patchItem.path.startsWith("/")
+            ? asLodashPath(patchItem.path) : toPath(patchItem.path);
+        if (!difPath?.length)
+            continue;
         const value = patchItem.value;
         if (isNullish(value)) {
-            unset(target, path);
+            unset(target, difPath);
         } if (isPrimitive(value)) {
-            set(target, path, value);
+            set(target, difPath, value);
         } else {
-            set(target, path, deepClone(value));
+            set(target, difPath, deepClone(value));
         }
     }
 }
