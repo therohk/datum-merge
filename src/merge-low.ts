@@ -1,6 +1,6 @@
-import { concat, differenceWith, intersectionWith, unionWith, isEqual } from "lodash-es";
+import { concat, differenceWith, intersectionWith, unionWith } from "lodash-es";
 import { emptyValue, isArrayOfAny, isNullish, isPrimitive, typeOfValue } from "./type-utils";
-import { areArraysEqual, deepClone } from "./datum-utils";
+import { areArraysEqual, deepClone, deepEquals } from "./datum-utils";
 
 export const UpdateCode = {
     T: "T", //touch, blank update
@@ -132,14 +132,14 @@ export function mergeVectorField(
             break;
         case UpdateCode.B:
         case UpdateCode.XM:
-            targetVals = unionWith(target[label], sourceVals, isEqual);
+            targetVals = unionWith(target[label], sourceVals, deepEquals);
             break;
         // case UpdateCode.D:
         case UpdateCode.XD:
-            targetVals = differenceWith(target[label], sourceVals, isEqual);
+            targetVals = differenceWith(target[label], sourceVals, deepEquals);
             break;
         case UpdateCode.XI:
-            targetVals = intersectionWith(target[label], sourceVals, isEqual);
+            targetVals = intersectionWith(target[label], sourceVals, deepEquals);
             break;
         default:
             return false;
