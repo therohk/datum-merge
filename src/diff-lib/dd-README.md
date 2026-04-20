@@ -2,7 +2,7 @@
 
 **deep-diff** is a javascript/node.js module providing utility functions for determining the structural differences between objects and includes some utilities for applying differences across objects.
 
-[![NPM](https://nodei.co/npm/datum-diff.png?downloads=true&downloadRank=true&stars=true)]
+[![NPM](https://nodei.co/npm/datum-diff.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/datum-diff)
 
 ## Install
 
@@ -22,9 +22,9 @@ npm install datum-diff
 In order to describe differences, change revolves around an `origin` object. For consistency, the `origin` object is always the operand on the `left-hand-side` of operations. The `comparand`, which may contain changes, is always on the `right-hand-side` of operations.
 
 ``` javascript
-var diff = require('datum-diff').diff;
+const diff = require('datum-diff').diff;
 
-var lhs = {
+const lhs = {
   name: 'my object',
   description: 'it\'s an object!',
   details: {
@@ -34,7 +34,7 @@ var lhs = {
   }
 };
 
-var rhs = {
+const rhs = {
   name: 'updated object',
   description: 'it\'s an object!',
   details: {
@@ -44,7 +44,7 @@ var rhs = {
   }
 };
 
-var differences = diff(lhs, rhs);
+const differences = diff(lhs, rhs);
 ```
 
 The code snippet above would result in the following structure describing the differences:
@@ -93,10 +93,10 @@ differences. If the structural differences are applied from the `comparand` to t
 When two objects differ, you can observe the differences as they are calculated and selectively apply those changes to the origin object (left-hand-side).
 
 ``` javascript
-var observableDiff = require('datum-diff').observableDiff;
-var applyChange = require('datum-diff').applyChange;
+const observableDiff = require('datum-diff').observableDiff;
+const applyChange = require('datum-diff').applyChange;
 
-var lhs = {
+const lhs = {
   name: 'my object',
   description: 'it\'s an object!',
   details: {
@@ -106,7 +106,7 @@ var lhs = {
   }
 };
 
-var rhs = {
+const rhs = {
   name: 'updated object',
   description: 'it\'s an object!',
   details: {
@@ -118,7 +118,7 @@ var rhs = {
 
 observableDiff(lhs, rhs, function (d) {
   // Apply all changes except to the name property...
-  if (d.path[d.path.length - 1] !== 'name') {
+  if (d.path.at(-1) !== 'name') {
     applyChange(lhs, rhs, d);
   }
 });
@@ -150,7 +150,7 @@ The `diff` function calculates the difference between two objects.
 Returns either an array of changes or, if there are no changes, `undefined`. This was originally chosen so the result would be pass a truthy test:
 
 ```javascript
-var changes = diff(obja, objb);
+const changes = diff(obja, objb);
 if (changes) {
   // do something with the changes.
 }
