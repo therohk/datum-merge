@@ -61,7 +61,8 @@ import { customMergePatch, MergeResult, revertPatchLog } from "datum-merge";
 const conf = { scalar: "I", vector: "XM", nested: "B" };
 const patch: MergeResult[] = customMergePatch(target, source, conf);
 const changed = revertPatchLog(patch, target);
-applyPatchLog(patch, anotherTarget);
+applyPatchLog(patch, otherTarget); //op replayed, exact paths
+forcePatchLog(patch, anotherTarget); //op ignored, nulls deleted
 ```
 ---
 
@@ -73,11 +74,9 @@ applyPatchLog(patch, anotherTarget);
 
 3. option to ignore errors for datatype mismatch during merge.
 
-4. support custom equality check within vector merge.
+4. support custom equality check for vector labels.
 
-5. support merging for top level arrays or primitives.
-
-6. better anti-diff function that retains deep similarities.
+5. better anti-diff function that retains deep similarities.
 
 Code contributions are welcome via issues and pull requests.
 

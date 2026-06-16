@@ -27,6 +27,10 @@ export function createValueKeys<T>(
     return Object.fromEntries(keys.map((k) => [k, value]));
 }
 
+export function shallowEquals(lhs: any, rhs: any): boolean {
+    return lhs === rhs;
+}
+
 export function deepEquals(lhs: any, rhs: any): boolean {
     if (lhs === rhs)
         return true;
