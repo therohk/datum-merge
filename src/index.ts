@@ -18,6 +18,7 @@ export { UpdateCode as MC } from "./merge-low";
 export { type MergeCode } from "./merge-low";
 export { updateCodeInfo } from "./merge-high";
 
+export { mergeVectors } from "./merge-low";
 export { shallowMerge, immutableMerge } from "./merge-high";
 export { deepMerge, immutableDeepMerge } from "./merge-high";
 export { diffFromMerge, patchFromMerge } from "./merge-high";
