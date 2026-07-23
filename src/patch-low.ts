@@ -131,7 +131,7 @@ export function forcePatchLog(
         const value = patchItem.value;
         if (isNullish(value)) {
             unset(target, difPath);
-        } if (isPrimitive(value)) {
+        } else if (isPrimitive(value)) {
             set(target, difPath, value);
         } else {
             set(target, difPath, deepClone(value));

@@ -81,11 +81,12 @@ export function fastGlobMatch(
     const partsLen = globParts.length;
     if (partsLen === 0)
         return !text;
+    const prefix = globParts[0]!;
     if (partsLen === 1)
-        return text === globParts[0];
-    if (!text.startsWith(globParts[0]!))
+        return text === prefix;
+    if (!text.startsWith(prefix))
         return false;
-    let textIdx = globParts[0]!.length;
+    let textIdx = prefix.length;
     for (let i = 1; i < partsLen - 1; i++) {
         const nextIdx = text.indexOf(globParts[i]!, textIdx);
         if (nextIdx < 0) {
@@ -94,7 +95,10 @@ export function fastGlobMatch(
         textIdx = nextIdx + globParts[i]!.length;
         continue;
     }
-    if (!text.endsWith(globParts[partsLen - 1]!))
+    const suffix = globParts[partsLen - 1]!;
+    if (textIdx > text.length - suffix.length)
+        return false;
+    if (!text.endsWith(suffix))
         return false;
     return true;
 }
