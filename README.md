@@ -46,7 +46,7 @@ const conf: MergeConfig = {
     scalar: UpdateCode.B,
     field1: UpdateCode.D,
     "arr*": UpdateCode.XM,
-    nested: UpdatedCode.N,
+    nested: UpdateCode.N,
     obj1: {
         scalar: UpdateCode.B,
         vector: UpdateCode.XM,
