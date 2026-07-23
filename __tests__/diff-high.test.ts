@@ -1,6 +1,6 @@
 import { deepClone, deepEquals } from "../src/datum-utils";
 import { Diff } from "../src/diff-lib/deep-diff";
-import { antiDiffTyped, deepDiffLow, deepDiffTyped } from "../src/diff-high";
+import { antiDiffTyped, deepDiffFlat, deepDiffLow, deepDiffTyped } from "../src/diff-high";
 import { deepPatchLog } from "../src/patch-low";
 
 describe("validate-diff-utils", () => {
@@ -29,6 +29,11 @@ describe("validate-diff-utils", () => {
         const stDiff1 = deepDiffTyped<any>(src, trg);
         expect(tsDiff1).toBeDefined();
         expect(stDiff1).toBeDefined();
+
+        const [trgUpd, trgRem] = deepDiffFlat(trg, src, true);
+        const [srcUpd, srcRem] = deepDiffFlat(src, trg, true);
+        expect(trgUpd).toEqual(srcRem);
+        expect(srcUpd).toEqual(trgRem);
 
         //no side effects
         expect(trg).toEqual(trgBkp);

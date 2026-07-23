@@ -84,16 +84,16 @@ export function deepDiffLow<T = any, S = T>(
 //-----------------------------------------------------------------------------
 
 export function deepDiffFlat(
-    oldFlat: any, //source
-    newFlat: any, //target
+    oldFlat: any, //target
+    newFlat: any, //source
     flatten: boolean = true,
 ): [any, any] {
     if (flatten) {
         oldFlat = flattenObject(oldFlat);
         newFlat = flattenObject(newFlat);
     }
-    const updated = Object.assign({}, oldFlat);
-    const removed = Object.assign({}, newFlat);
+    const removed = Object.assign({}, oldFlat);
+    const updated = Object.assign({}, newFlat);
     //delete the unchanged keys
     for (const key of Object.keys(newFlat)) {
         if (newFlat[key] === oldFlat[key]) {
