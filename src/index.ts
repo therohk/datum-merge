@@ -22,13 +22,14 @@ export { mergeVectors } from "./merge-low";
 export { shallowMerge, immutableMerge } from "./merge-high";
 export { deepMerge, immutableDeepMerge } from "./merge-high";
 export { diffFromMerge, patchFromMerge } from "./merge-high";
+export { bypassMergeDiff } from "./merge-high";
 
 export { type DetailConfig } from "./merge-conf";
 export { detailMerge, immutableDetailMerge } from "./merge-conf";
 export { type MergeConfig } from "./merge-conf";
 export { fillUpdateCodes } from "./merge-conf";
 export { customMerge, immutableCustomMerge } from "./merge-conf";
-export { bypassMerge } from "./merge-conf";
+export { customMergeDiff } from "./merge-conf";
 
 export { type MergeResult } from "./merge-patch";
 export { customMergePatch, bypassMergePatch } from "./merge-patch";
@@ -36,6 +37,6 @@ export { deepMergeLog, selectPathCode } from "./merge-patch";
 
 //defaults
 export { deepMerge as merge } from "./merge-high";
-export { customMerge as mergeDiff } from "./merge-conf";
+export { customMergeDiff as mergeDiff } from "./merge-conf";
 export * from "./diff-lib/deep-diff";
 export { deepDiffLow as deepDiff } from "./diff-high";

@@ -1,5 +1,5 @@
 import { isArrayOfAny, emptyObject, isNullish, isObject, isString } from "./type-utils";
-import { deepClone, fastGlobMatch, getObjectKeys, selectObjKeys } from "./datum-utils";
+import { deepClone, fastGlobMatch, getObjectKeys } from "./datum-utils";
 import { deepDiffTyped } from "./diff-high";
 import { UpdateCode, MergeCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { updateCodeInfo } from "./merge-high";
@@ -100,56 +100,53 @@ export function getDetailKeys(
 //-----------------------------------------------------------------------------
 
 /**
- * merge structured data and return diff
- * @returns diff or false if no changes
+ * merge structured data with config
+ * @returns if target was changed
  */
 export function customMerge<T extends object>(
     target: T,
     source: Partial<T>,
     mergeConf: MergeConfig | MergeCode,
     excludeKeys?: string[],
-): Partial<T> | false {
+): boolean {
     //implement externally
     switch (mergeConf) {
         case UpdateCode.C:
             return false; //diff is source
         case UpdateCode.T:
-            return {};
+            return true;
         case UpdateCode.N:
             return false;
         case UpdateCode.Y:
-            return bypassMerge(target, source);
+            Object.assign(target, { ...source });
+            return true;
     }
+    // const blockUnset = !updateCodeInfo(mergeConf.scalar).unset;
     const mergeCodes = fillUpdateCodes(source, mergeConf, false, excludeKeys);
     if (emptyObject(mergeCodes)) {
         return false;
     }
-    const targetBkp: T = deepClone(target);
     const changed = detailMerge(target, source, mergeCodes);
-    const delta = deepDiffTyped<T>(targetBkp, target, true);
-    if (changed || !emptyObject(delta)) {
-        return delta;
-    }
-    return false;
+    return changed;
 }
 
 /**
- * bypass merge using direct assignment
- * behaves like shallow merge with code Y
+ * merge structured data and return diff
  * @returns diff or false if no changes
  */
-export function bypassMerge<T extends object>(
+export function customMergeDiff<T extends object>(
     target: T,
-    source: object,
+    source: Partial<T>,
+    mergeConf: MergeConfig | MergeCode,
+    excludeKeys?: string[],
 ): Partial<T> | false {
-    if (emptyObject(source)) {
-        return false;
-    }
-    let delta = deepDiffTyped<T>(target, source as T, true);
-    Object.assign(target, { ...source }); //bypass logic
-    //only source fields in diff
-    delta = selectObjKeys(delta, getObjectKeys(source));
-    return emptyObject(delta) ? false : delta;
+    // if (mergeConf === UpdateCode.Y) {
+    //     return bypassMergeDiff(target, source);
+    // }
+    const targetBkp: T = deepClone(target);
+    const changed = customMerge(target, source, mergeConf, excludeKeys);
+    const delta = deepDiffTyped<T>(targetBkp, target, true);
+    return changed || !emptyObject(delta) ? delta : false;
 }
 
 /**
@@ -239,6 +236,7 @@ export const fillUpdateCodes = (
         }
         //fallback cases
         if (isObject(srcValue)) {
+            //todo allow optional full config
             mergeCodes[srcLabel] = deepConf.nested;
         } else if (isArrayOfAny(srcValue)) {
             mergeCodes[srcLabel] = deepConf.vector;
