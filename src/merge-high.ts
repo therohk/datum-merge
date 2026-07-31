@@ -1,5 +1,5 @@
 import { isArrayOfAny, emptyObject, isObject, isString } from "./type-utils";
-import { deepClone, getObjectKeys } from "./datum-utils";
+import { deepClone, getObjectKeys, selectObjKeys } from "./datum-utils";
 import { MergeCode, UpdateCode, mergeScalarField, mergeVectorField } from "./merge-low";
 import { deepDiffTyped } from "./diff-high";
 import { PatchResult, deepPatchLog } from "./patch-low";
@@ -188,4 +188,24 @@ export function patchFromMerge(
     const targetCopy = immutableDeepMerge(target, source, scalarCode, vectorCode, nestedCode);
     const patch = deepPatchLog(target, targetCopy, orderInd, true);
     return !patch?.length ? false : patch;
+}
+
+/**
+ * bypass merge using direct assignment
+ * behaves like shallow merge with code Y
+ * @returns diff or false if no changes
+ */
+export function bypassMergeDiff<T extends object>(
+    target: T,
+    source: object,
+    orderInd: boolean = true,
+): Partial<T> | false {
+    if (emptyObject(source)) {
+        return false;
+    }
+    let delta = deepDiffTyped<T>(target, source as T, orderInd);
+    Object.assign(target, { ...source }); //bypass logic
+    //only source fields in diff
+    delta = selectObjKeys(delta, getObjectKeys(source));
+    return emptyObject(delta) ? false : delta;
 }

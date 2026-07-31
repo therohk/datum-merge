@@ -31,7 +31,7 @@ export function mergeScalarField(
     mergeCode: MergeCode,
 ): boolean {
     const sourceHas = !isNullish(source[label]);
-    const targetKey = target.hasOwnProperty(label);
+    const targetKey = Object.prototype.hasOwnProperty.call(target, label);
     const targetHas = targetKey && !isNullish(target[label]);
     if (!targetHas && !sourceHas) {
         return false;
@@ -99,7 +99,7 @@ export function mergeVectorField(
         return false; //sourceHas
     }
     let sourceVec = isArrayOfAny(sourceVals);
-    const targetKey = target.hasOwnProperty(label);
+    const targetKey = Object.prototype.hasOwnProperty.call(target, label);
     const targetHas = targetKey && !isNullish(target[label]);
     const targetVec = isArrayOfAny(target[label]);
     if (targetHas && !targetVec) {
@@ -139,6 +139,7 @@ export function mergeVectorField(
             targetVals = differenceWith(target[label], sourceVals, deepEquals);
             break;
         case UpdateCode.XI:
+            //like XR for empty target?
             targetVals = intersectionWith(target[label], sourceVals, deepEquals);
             break;
         default:
