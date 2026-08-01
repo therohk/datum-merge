@@ -103,9 +103,9 @@ export function getDetailKeys(
  * merge structured data with config
  * @returns if target was changed
  */
-export function customMerge<T extends object>(
-    target: T,
-    source: Partial<T>,
+export function customMerge(
+    target: { [key: string]: any },
+    source: { [key: string]: any },
     mergeConf: MergeConfig | MergeCode,
     excludeKeys?: string[],
 ): boolean {
@@ -141,7 +141,7 @@ export function customMergeDiff<T extends object>(
     excludeKeys?: string[],
 ): Partial<T> | false {
     // if (mergeConf === UpdateCode.Y) {
-    //     return bypassMergeDiff(target, source);
+    //     return bypassMergeDiff(target, source); //legacy
     // }
     const targetBkp: T = deepClone(target);
     const changed = customMerge(target, source, mergeConf, excludeKeys);

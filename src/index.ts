@@ -22,7 +22,7 @@ export { mergeVectors } from "./merge-low";
 export { shallowMerge, immutableMerge } from "./merge-high";
 export { deepMerge, immutableDeepMerge } from "./merge-high";
 export { diffFromMerge, patchFromMerge } from "./merge-high";
-export { bypassMergeDiff } from "./merge-high";
+export { bypassMergeDiff as bypassMerge } from "./merge-high";
 
 export { type DetailConfig } from "./merge-conf";
 export { detailMerge, immutableDetailMerge } from "./merge-conf";
