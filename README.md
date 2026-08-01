@@ -1,6 +1,6 @@
 # datum-merge
 
-**datum-merge** is a modern typescript library that simplifies merge and diff operations for deeply nested objects.
+**datum-merge** is a modern typescript library that simplifies merge and diff operations for deeply nested objects
 
 **Source Code** : https://github.com/therohk/datum-merge
 
@@ -12,10 +12,10 @@
 
 ## Sample Usage
 
-Merge with default config:
+Deep merge with default config :
 ```
-import { merge, customMerge, UpdateCode } from "datum-merge";
-const changed = merge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
+import { deepMerge, customMerge, UpdateCode } from "datum-merge";
+const changed = deepMerge(target, source, UpdateCode.I, UpdateCode.XM, UpdateCode.B);
 //same as
 const diff = customMerge(target, source, {
     scalar: UpdateCode.I,
@@ -24,7 +24,7 @@ const diff = customMerge(target, source, {
 });
 ```
 
-Exact nestable config that ignores all other fields:
+Exact nestable config that ignores all other fields :
 ```
 import { detailMerge, UpdateCode } from "datum-merge";
 const changed = detailMerge(target, source, {
@@ -38,9 +38,9 @@ const changed = detailMerge(target, source, {
 });
 ```
 
-Deep merge with generic config patterns:
+Deep merge with generic config patterns :
 ```
-import { customMerge, MergeConfig, UpdateCode } from "datum-merge";
+import { customMergeDiff, MergeConfig, UpdateCode } from "datum-merge";
 const conf: MergeConfig = {
     "*_id": UpdateCode.I,
     scalar: UpdateCode.B,
@@ -52,10 +52,11 @@ const conf: MergeConfig = {
         vector: UpdateCode.XM,
     },
 };
-const diff: Partial<T> = customMerge<T>(target, source, conf);
+const changed: boolean = customMerge(target, source, conf);
+const diff: Partial<T> = customMergeDiff<T>(target, source, conf);
 ```
 
-Reversible deep merge with changelog in json-patch format:
+Reversible merge with changelog in json-patch format :
 ```
 import { customMergePatch, MergeResult, revertPatchLog } from "datum-merge";
 const conf = { scalar: "I", vector: "XM", nested: "B" };
@@ -68,30 +69,30 @@ forcePatchLog(patch, anotherTarget); //op ignored, nulls deleted
 
 ## Upcoming Features
 
-1. publish diff module as a standalone package ([available](/src/diff-lib/README.md)).
+1. publish diff module as a standalone package ([available](/src/diff-lib/README.md)) .
 
-2. formalize config schema for deeply nested objects (for v1).
+2. formalize config schema for deeply nested objects (for v1) .
 
-3. option to ignore errors for datatype mismatch during merge.
+3. option to ignore errors for datatype mismatch during merge .
 
-4. support custom equality check for vector labels.
+4. support custom equality check for vector labels .
 
-5. better anti-diff function that retains deep similarities.
+5. better anti-diff function that retains deep similarities .
 
-Code contributions are welcome via issues and pull requests.
+Code contributions are welcome via issues and pull requests .
 
 ---
 
 ## Merge Strategy
 
-This string code describes how modifications to an attribute for a PUT/UPDATE operation should be handled.
-It decides whether a change to the value of the field is allowed during a merge between two entities.
+This string code describes how modifications to an attribute for a put/update operation should be handled .
+It decides whether a change to the value of the field is allowed during a merge between two entities .
 
 ### Strategy Codes
 
-The same field within a target and source object is represented by `t` and `s` respectively.
-Whether the strategy requires data to be present for the field, is shown by { 0=no, 1=yes, X=irrelavant }. 
-The value is migrated from the source field to the target field only if the predicate passes.
+The same field within a target and source object is represented by `t` and `s` respectively .
+Whether the strategy requires data to be present for the field , is shown by `{ 0=no, 1=yes, X=irrelevant }` . 
+The value is migrated from the source field to the target field only if the predicate passes .
 
 | Code | Predicate | Meaning |
 |----|----|----|
@@ -109,17 +110,22 @@ The value is migrated from the source field to the target field only if the pred
 | XD | `t - s`   | set difference, delete given values |
 | XI | `t ∩ s`   | set intersection, delete missing values |
 | XS | `t + s` | preserve order insert (allows dupes) |
-| XF | `s + t` | insert from start (allows dupes) |
+| XF | `s + t` | insert from front (allows dupes) |
 
 ### Diff Codes
 
-Applying the merge results in one of these transitions per primitive value in the target object.
+Applying a merge transaction may lead to many changes within a target datum .
+These can optionally be logged as a [json-patch](https://datatracker.ietf.org/doc/html/rfc6902) array or diff object .
+
+Each value transition is captured at the deepest primitive level as an edit .
+Changes affecting keys or array length get captured at the object level .
+The boolean `changed` response is further sensitive to cleanups and address shifts .
 
 | Patch Op | Meaning | Rev Code | Transitions |
 |----|----|----|----|
 | `add`     | new / insert   | I | `null <-- non-null` |
-| `replace` | edit / update  | H | `non-null <-- non-null` |
 | `remove`  | unset / delete | D | `non-null <-- null` |
+| `replace` | edit / update  | H | `non-null <-- non-null` |
 | `test`    | noop / skip / ignore | N | `null <-- null` or `non-null == non-null` |
 
 ---
