@@ -7,6 +7,7 @@ esbuild.build({
 	bundle: true,
 	platform: 'browser',
 	format: 'iife',
+	globalName: 'DatumMerge',
 	target: 'es6',
 	external: [],
 	logLevel: 'info',
