@@ -5,6 +5,7 @@ export { type PreFilterObject };
 export { type Accumulator };
 export { type Observer };
 export { type DiffPath };
+export { type DiffKind };
 
 export { diff };
 export { orderIndependentDiff };
@@ -66,7 +67,7 @@ type PathKey = string | number | symbol;
 type DiffPath = PathKey[];
 type StackItem<LHS, RHS = LHS> = { lhs: LHS, rhs: RHS };
 
-const typeNormalizer: PreFilterObject<any, any> = {
+const typeNormalizer: PreFilterObject<any, any> = { //example
     normalize: function (currentPath: any, key: any, lhs: any, rhs: any): [any, any] {
         if (realTypeOf(lhs) === 'regexp' && realTypeOf(rhs) === 'regexp') {
             lhs = lhs.toString();
@@ -558,7 +559,7 @@ function getOrderIndependentHash(val: any): number {
     }
     if (type === 'object') {
         for (let key in val) {
-            if (val.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(val, key)) {
                 const keyValueHash = getOrderIndependentHash(val[key]);
                 const keyValueString = `[ type: object, key: ${key}, value hash: ${keyValueHash}]`;
                 accum += hashThisString(keyValueString);

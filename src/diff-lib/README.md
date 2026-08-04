@@ -1,14 +1,14 @@
 # datum-diff
 
-module recently published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff)
+module recently published as a standalone package [datum-diff](https://www.npmjs.com/package/datum-diff) .
 
-works as a drop-in replacement for the deprecated package [deep-diff](https://www.npmjs.com/package/deep-diff)
+works as a drop-in replacement for the deprecated package [deep-diff](https://www.npmjs.com/package/deep-diff) .
 
 simply use `datum-diff` instead of the `datum-merge` libary in the examples below .
 
-for usage on browser environments:
+for usage on browser environments :
 ```
-<script src="https://unpkg.com/datum-diff@1.0.3/dist-diff/umd/deep-diff.min.js"></script>
+<script src="https://unpkg.com/datum-diff@1.0.5/dist-diff/umd/deep-diff.min.js"></script>
 ```
 
 ## sources
