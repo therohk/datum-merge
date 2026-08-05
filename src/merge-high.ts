@@ -18,15 +18,18 @@ export function updateCodeInfo(
         return { enable: false };
     }
     const allowUnset = ([
-        UpdateCode.Y, UpdateCode.D, UpdateCode.U,
+        UpdateCode.Y, UpdateCode.F,
+        UpdateCode.D, UpdateCode.U,
         UpdateCode.XR, UpdateCode.XD, UpdateCode.XI] as string[]
     ).includes(mergeCode);
     const allowInsert = ([
-        UpdateCode.Y, UpdateCode.I, UpdateCode.B,
+        UpdateCode.Y, UpdateCode.F,
+        UpdateCode.I, UpdateCode.B,
         UpdateCode.XR, UpdateCode.XM, UpdateCode.XS, UpdateCode.XF] as string[]
     ).includes(mergeCode);
     const allowUpdate = ([
-        UpdateCode.Y, UpdateCode.H, UpdateCode.U, UpdateCode.B,
+        UpdateCode.Y, UpdateCode.F,
+        UpdateCode.H, UpdateCode.U, UpdateCode.B,
         UpdateCode.XR, UpdateCode.XS, UpdateCode.XF,
         UpdateCode.XM, UpdateCode.XI, UpdateCode.XD] as string[]
     ).includes(mergeCode);

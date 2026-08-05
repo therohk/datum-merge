@@ -8,6 +8,7 @@ export const UpdateCode = {
     // scalar/def codes
     N: "N", //ignore change
     Y: "Y", //accept any change
+    F: "F", //insert or update or cleanup
     B: "B", //insert or update, no delete
     U: "U", //update or delete only
     H: "H", //update only if exists
@@ -52,6 +53,9 @@ export function mergeScalarField(
         case UpdateCode.Y:
             target[label] = deepClone(source[label]);
             return true; //should bypass
+        case UpdateCode.F:
+            migrateVal = true;
+            break; //should cleanup
         case UpdateCode.B:
             if (sourceHas) migrateVal = true;
             break;
@@ -120,7 +124,7 @@ export function mergeVectorField(
             target[label] = deepClone(sourceVals);
             return true; //should bypass
         case UpdateCode.XR:
-            targetVals = sourceVals;
+            targetVals = [...sourceVals];
             break;
         // case UpdateCode.C:
         case UpdateCode.XS:
