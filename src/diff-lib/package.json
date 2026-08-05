@@ -32,7 +32,7 @@
 		"buildlib:esm": "tsc --project tsconfig.lib.json --module ESNext --outDir dist-diff/esm",
 		"buildlib:umd": "tsc --project tsconfig.lib.json -noEmit -skipLibCheck && node esbuild.lib.mjs production",
 		"buildlib": "run-s buildlib:*",
-		"compile": "tsc -noEmit -skipLibCheck"
+		"compile": "tsc --project tsconfig.lib.json -noEmit -skipLibCheck"
 	},
 	"repository": {
 		"type": "git",
@@ -45,7 +45,7 @@
 		"@typescript-eslint/parser": "8.53.1",
 		"@types/jest": "^29.5.2",
 		"eslint": "^8.57.1",
-		"npm-run-all2": "^6.2.6",
+		"npm-run-all2": "^7.0.2",
 		"jest": "^29.7.0",
 		"ts-jest": "^29.1.0",
 		"ts-node": "^10.9.2",

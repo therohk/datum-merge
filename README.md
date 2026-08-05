@@ -65,6 +65,7 @@ const changed = revertPatchLog(patch, target);
 applyPatchLog(patch, otherTarget); //op replayed, exact paths
 forcePatchLog(patch, anotherTarget); //op ignored, nulls deleted
 ```
+
 ---
 
 ## Upcoming Features
@@ -85,7 +86,7 @@ Code contributions are welcome via issues and pull requests .
 
 ## Merge Strategy
 
-This string code describes how modifications to an attribute for a put/update operation should be handled .
+This string code describes how modifications to one attribute for a put/update operation should be handled .
 It decides whether a change to the value of the field is allowed during a merge between two entities .
 
 ### Strategy Codes
@@ -99,7 +100,8 @@ The value is migrated from the source field to the target field only if the pred
 | C | n/a | always create new instance |
 | T | n/a | touch datum ; empty merge |
 | N | `0` | reject any change ; skip merge |
-| Y | `tX & sX` | accept any change ; bypass merge |
+| Y | `1` | accept any change ; bypass merge |
+| F | `tX & sX` | migrate or cleanup |
 | B | `tX & s1` | insert or update, no delete |
 | H | `t1 & s1` | update only if exists |
 | U | `t1 & sX` | update or delete only, no insert |
@@ -114,11 +116,11 @@ The value is migrated from the source field to the target field only if the pred
 
 ### Diff Codes
 
-Applying a merge transaction may lead to many changes within a target datum .
+Applying a merge transaction may lead to many changes within a target object .
 These can optionally be logged as a [json-patch](https://datatracker.ietf.org/doc/html/rfc6902) array or diff object .
 
-Each value transition is captured at the deepest primitive level as an edit .
-Changes affecting keys or array length get captured at the object level .
+Each value side transition is captured at the deepest primitive level as an edit .
+Changes affecting key side or array length are captured at its value level .
 The boolean `changed` response is further sensitive to cleanups and address shifts .
 
 | Patch Op | Meaning | Rev Code | Transitions |
