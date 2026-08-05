@@ -72,20 +72,17 @@ export function isArrayOf<T>(
         && arr.every(typeCheck);
 }
 
-export function isArrayOfSame(arr: any): string | false {
-    return Array.isArray(arr)
-        && new Set(arr.map((e) => typeof e)).size === 1
-        ? typeof arr[0] : false;
-}
-
 export function emptyValue(value: any): boolean {
     return (value === undefined)
         || (value === null)
+        // || value === "" || value === Number.NaN
         || (Array.isArray(value) && !value.length)
         || (typeof value === "object" && !Object.keys(value).length);
 }
 
 export function typeOfValue(value: any): string {
+    // if (isNullish(value))
+    //     return 'null'; //scalar
     const type = typeof value;
     if (type !== 'object') {
         return type; //scalar

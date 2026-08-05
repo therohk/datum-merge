@@ -20,6 +20,15 @@ export function getObjectKeys(
     return sourceKeys;
 };
 
+export function isPlainObject(
+    value: any,
+): value is object { //obj is Datum
+    if (typeof value !== 'object' || value === null)
+        return false;
+    const proto = Object.getPrototypeOf(value);
+    return proto === null || proto === Object.prototype;
+}
+
 export function createValueKeys<T>(
     keys: string[],
     value: T,
@@ -43,10 +52,6 @@ export function deepEqualsPath(lhs: any, rhs: any, atPath: string): boolean {
 
 export function deepClone<T = any>(val: T): T {
     return cloneDeep(val);
-}
-
-export function toUniqueArray<T>(arr: T[]): T[] {
-    return [...new Set<T>(arr)];
 }
 
 export function areArraysEqual<T>(
@@ -105,21 +110,20 @@ export function fastGlobMatch(
 
 export function getGlobKeys(
     obj: any,
-    inclPats: string[] = ["*"],
-    exclPats?: string[],
+    inclGlobs: string[] = ["*"],
+    exclGlobs?: string[],
 ): string[] {
     return Object.keys(obj)
-        .filter((k) => !inclPats || inclPats.some((g) => fastGlobMatch(g, k)))
-        .filter((k) => !exclPats?.length || !exclPats.some((g) => fastGlobMatch(g, k)));
+        .filter((k) => !inclGlobs || inclGlobs.some((g) => fastGlobMatch(g, k)))
+        .filter((k) => !exclGlobs?.length || !exclGlobs.some((g) => fastGlobMatch(g, k)));
 }
 
 export function selectObjKeys<T extends object>(
     obj: T,
-    includeKeys: string[],
+    inclKeys?: string[],
 ): Partial<T> {
-    if (!includeKeys?.length)
-        return { ...obj };
+    inclKeys = inclKeys || getObjectKeys(obj);
     return Object.fromEntries(Object.entries(obj)
-        .filter(([k, _]) => includeKeys.includes(k))
-    ) as Partial<T>;
+        .filter(([k, _]) => inclKeys.includes(k))
+    ) as Partial<T>; //shallow copy
 }

@@ -1,4 +1,4 @@
-import { emptyObject, emptyValue, isArrayOf, isArrayOfAny, isArrayOfSame, isObject, isString, typeOfValue } from "../src/type-utils";
+import { emptyObject, emptyValue, isArrayOf, isArrayOfAny, isObject, isString, typeOfValue } from "../src/type-utils";
 import { areArraysEqual, deepClone, deepEquals, deepEqualsPath } from "../src/datum-utils";
 import { deepDiffFlat, deepDiffTyped, flattenObject, unflattenObject } from "../src/diff-high";
 
@@ -41,11 +41,6 @@ describe("validate-utils", () => {
         expect(isArrayOf(["2", 2], isString)).toBe(false);
         expect(isArrayOf([], isString)).toBe(false);
         expect(isArrayOf([{}, {}], isString)).toBe(false);
-
-        expect(isArrayOfSame(["2", 2])).toBe(false);
-        expect(isArrayOfSame(["2", "2"])).toBe("string");
-        expect(isArrayOfSame([2, 2])).toBe("number");
-        expect(isArrayOfSame([{ a: "a" }, { b: "b" }])).toBe("object");
 
     });
 
