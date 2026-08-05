@@ -538,9 +538,12 @@ function realTypeOf(val: any): string {
         return 'array';
     } else if (Object.prototype.toString.call(val) === '[object Date]') {
         return 'date';
-    } else if (typeof val.toString === 'function' && /^\/.*\//.test(val.toString())) {
+    } else if (Object.prototype.toString.call(val) === '[object RegExp]') {
         return 'regexp';
     }
+    // else if (typeof val.toString === 'function' && /^\/.*\//.test(val.toString())) {
+    //     return 'regexp'; //legacy <= v1.0.5
+    // }
     return 'object';
 }
 
