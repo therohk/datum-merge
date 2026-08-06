@@ -1,4 +1,4 @@
-import { concat, differenceWith, intersectionWith, unionWith } from "lodash-es";
+import { concat, difference, differenceWith, intersection, intersectionWith, union, unionWith } from "lodash-es";
 import { emptyValue, isArrayOf, isArrayOfAny, isNullish, isPrimitive, typeOfValue } from "./type-utils";
 import { areArraysEqual, deepClone, deepEquals } from "./datum-utils";
 
@@ -168,7 +168,6 @@ export function mergeVectors<T>(
 ): T[] {
     if (!arr1?.length && !arr2?.length)
         return [];
-    //major perf boost
     if (equalsCond === false) {
         equalsCond = undefined;
     } else if (typeof equalsCond !== "function") {
@@ -176,13 +175,24 @@ export function mergeVectors<T>(
             && isArrayOf(arr2, isPrimitive)
             ? undefined : deepEquals;
     }
+    if (equalsCond) {
+        //slow quadratic comparison
+        switch (mergeCode) {
+            case UpdateCode.XM:
+                return unionWith<T>(arr1, arr2, equalsCond);
+            case UpdateCode.XI:
+                return intersectionWith<T, T>(arr1, arr2, equalsCond);
+            case UpdateCode.XD:
+                return differenceWith<T, T>(arr1, arr2, equalsCond);
+        }
+    }
     switch (mergeCode) {
         case UpdateCode.XM:
-            return unionWith<T>(arr1, arr2, equalsCond);
+            return union(arr1, arr2);
         case UpdateCode.XI:
-            return intersectionWith<T, T>(arr1, arr2, equalsCond!);
+            return intersection(arr1, arr2);
         case UpdateCode.XD:
-            return differenceWith<T, T>(arr1, arr2, equalsCond!);
+            return difference(arr1, arr2);
         case UpdateCode.XS:
             return concat<T>(arr1 ?? [], arr2 ?? []);
     }

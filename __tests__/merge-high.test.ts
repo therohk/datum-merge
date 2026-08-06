@@ -1,5 +1,5 @@
-import { deepClone } from "../src/datum-utils";
-import { UpdateCode } from "../src/merge-low";
+import { deepClone, deepEquals } from "../src/datum-utils";
+import { mergeVectors, UpdateCode } from "../src/merge-low";
 import { immutableDeepMerge, immutableMerge } from "../src/merge-high";
 
 describe("validate-merge-utils", () => {
@@ -92,6 +92,21 @@ describe("validate-merge-utils", () => {
         // expect(() => { immutableMerge({ sv: undefined }, rhs, uc, UpdateCode.XM) }).toThrow();
         expect(immutableMerge({ sv: null }, rhs, uc, UpdateCode.XF)).toEqual(rhs);
         expect(immutableMerge({ sv: undefined }, rhs, uc, UpdateCode.XS)).toEqual(rhs);
+
+        //large vectors
+        expect(mergeVectors(UpdateCode.XM, lhs.a, rhs.a)).toEqual(["11", "22", "33", "44"]);
+        expect(mergeVectors(UpdateCode.XI, lhs.a, rhs.a)).toEqual(["22", "33"]);
+        expect(mergeVectors(UpdateCode.XD, lhs.a, rhs.a)).toEqual(["11"]);
+        expect(mergeVectors(UpdateCode.XD, rhs.a, lhs.a)).toEqual(["44"]);
+        expect(mergeVectors(UpdateCode.XS, lhs.a, rhs.a).length).toEqual(6);
+
+        const objLhs = [{ x: "11" }, { b: "22" }, { y: "33" }];
+        const objRhs = [{ y: "33" }, { b: "22" }, { z: "11" }];
+        expect(mergeVectors(UpdateCode.XM, objLhs, objRhs, deepEquals).length).toEqual(4);
+        expect(mergeVectors(UpdateCode.XI, objLhs, objRhs, deepEquals).length).toEqual(2);
+        expect(mergeVectors(UpdateCode.XD, objLhs, objRhs, deepEquals)).toEqual([{ x: "11" }]);
+        expect(mergeVectors(UpdateCode.XD, objRhs, objLhs, deepEquals)).toEqual([{ z: "11" }]);
+        expect(mergeVectors(UpdateCode.XS, objLhs, objRhs, deepEquals).length).toEqual(6);
 
         //no side effects
         expect(lhsCopy).toEqual(lhs);
