@@ -63,7 +63,6 @@ export function shallowMerge(
     let changed = false;
     for (const label of sourceKeys) {
         if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
-            //fails if target is not array
             if (mergeVectorField(target, source, label, vectorCode ?? scalarCode)) {
                 changed = true;
             }
@@ -113,25 +112,36 @@ export function deepMerge(
     let changed = false;
     for (const label of sourceKeys) {
         if (isArrayOfAny(target[label]) || isArrayOfAny(source[label])) {
+            //fails if target is not array
             changed = mergeVectorField(target, source, label, vectorCode) || changed;
             continue;
         }
+        if (!isObject(target[label]) && !isObject(source[label])) {
+            changed = mergeScalarField(target, source, label, scalarCode) || changed;
+            continue;
+        }
+        if (nestedCode === UpdateCode.N) {
+            continue;
+        }
+        if (nestedCode === UpdateCode.Y) {
+            //enable and treat as scalar
+            changed = mergeScalarField(target, source, label, scalarCode) || changed;
+            continue;
+        }
         //recursive call for objects
-        //todo should nest for empty target
         if (isObject(target[label]) && isObject(source[label])) {
-            if (nestedCode === UpdateCode.N)
-                continue;
-            if (nestedCode === UpdateCode.Y) {
-                changed = mergeScalarField(target, source, label, scalarCode) || changed;
-                continue;
-            }
             changed = deepMerge(target[label], source[label],
                 nestedCode.startsWith("X") ? scalarCode : nestedCode,
                 nestedCode.startsWith("X") ? nestedCode : vectorCode,
-                nestedCode) || changed;
+                nestedCode
+            ) || changed;
             continue;
         }
-        changed = mergeScalarField(target, source, label, scalarCode) || changed;
+        //nest for empty target
+        changed = (nestedCode.startsWith("X")
+            ? mergeVectorField(target, source, label, nestedCode)
+            : mergeScalarField(target, source, label, nestedCode)
+        ) || changed;
     }
     return changed;
 }

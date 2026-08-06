@@ -20,7 +20,7 @@ export const UpdateCode = {
     XD: "XD", //set difference, delete given values
     XI: "XI", //set intersection, delete missing values
     XS: "XS", //preserve order insert (allows dupes)
-    XF: "XF", //insert from start (allows dupes)
+    XF: "XF", //insert from front (allows dupes)
 } as const;
 
 export type MergeCode = typeof UpdateCode[keyof typeof UpdateCode];
@@ -34,7 +34,7 @@ export function mergeScalarField(
     const sourceHas = !isNullish(source[label]);
     const targetKey = Object.prototype.hasOwnProperty.call(target, label);
     const targetHas = targetKey && !isNullish(target[label]);
-    if (!targetHas && !sourceHas) {
+    if (!targetKey && !sourceHas) {
         return false;
     }
     if (targetHas && sourceHas) {
@@ -83,8 +83,7 @@ export function mergeScalarField(
         return false;
     }
     target[label] = !sourceHas || isPrimitive(source[label])
-        ? source[label]
-        : deepClone(source[label]);
+        ? source[label] : deepClone(source[label]);
     if (emptyValue(target[label])) {
         delete target[label];
         return targetKey;
@@ -107,15 +106,16 @@ export function mergeVectorField(
     const targetHas = targetKey && !isNullish(target[label]);
     const targetVec = isArrayOfAny(target[label]);
     if (targetHas && !targetVec) {
-        //should T => T[] change be allowed  
+        //blocks T => T[] type change
         throw new TypeError("type change to vector for " + label);
     }
-    //todo verify same array types
     if (!sourceVec) {
         sourceVals = [sourceVals] as unknown[];
         sourceVec = true;
     }
-
+    //optimize common scenario
+    const skipEquals = (!targetHas || isArrayOf(target[label], isPrimitive))
+        && isArrayOf(sourceVals, isPrimitive);
     let targetVals: unknown[];
     switch (mergeCode) {
         case UpdateCode.N:
@@ -136,15 +136,18 @@ export function mergeVectorField(
             break;
         case UpdateCode.B:
         case UpdateCode.XM:
-            targetVals = unionWith(target[label], sourceVals, deepEquals);
+            targetVals = skipEquals ? union(target[label], sourceVals)
+                : unionWith(target[label], sourceVals, deepEquals);
             break;
         // case UpdateCode.D:
         case UpdateCode.XD:
-            targetVals = differenceWith(target[label], sourceVals, deepEquals);
+            targetVals = skipEquals ? difference(target[label], sourceVals)
+                : differenceWith(target[label], sourceVals, deepEquals);
             break;
         case UpdateCode.XI:
             //like XR for empty target?
-            targetVals = intersectionWith(target[label], sourceVals, deepEquals);
+            targetVals = skipEquals ? intersection(target[label], sourceVals)
+                : intersectionWith(target[label], sourceVals, deepEquals);
             break;
         default:
             return false;
