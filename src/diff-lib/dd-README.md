@@ -147,7 +147,7 @@ The `diff` function calculates the difference between two objects.
   * `normalize` - function that pre-processes every _leaf_ of the tree.
 * `acc` - an optional accumulator/array (requirement is that it have a `push` function). Each difference is pushed to the specified accumulator.
 
-Returns either an array of changes or, if there are no changes, `undefined`. This was originally chosen so the result would be pass a truthy test:
+Returns either an array of changes or, if there are no changes, `undefined`. This was originally chosen so the result would pass a truthy test:
 
 ```javascript
 const changes = diff(obja, objb);
@@ -158,7 +158,7 @@ if (changes) {
 
 #### Pre-filtering Object Properties
 
-The `prefilter`'s signature should be `function(path, key)` and it should return a truthy value for any `path`-`key` combination that should be filtered. If filtered, the difference analysis does no further analysis of on the identified object-property path.
+The `prefilter`'s signature should be `function(path, key)` and it should return a truthy value for any `path`-`key` combination that should be filtered. If filtered, the difference analysis does no further analysis on the identified object-property path.
 
 ```javascript
 const diff = require('datum-diff');
@@ -214,7 +214,7 @@ const none = diff(data, clone, {
     if (rhs === 149) {
       rhs = 42;
     }
-    return [lsh, rhs];
+    return [lhs, rhs];
   }
 });
 
@@ -226,7 +226,7 @@ assert.ok(typeof none === 'undefined', 'should reflect no difference');
 
 The `observableDiff` function calculates the difference between two objects and reports each to an observer function.
 
-#### Argmuments
+#### Arguments
 
 * `lhs` - the left-hand operand; the origin object.
 * `rhs` - the right-hand operand; the object being compared structurally with the origin object.

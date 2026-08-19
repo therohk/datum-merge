@@ -74,6 +74,23 @@ export function areArraysEqual<T>(
 
 //-----------------------------------------------------------------------------
 
+function fastSplitGlobs(text: string): string[] {
+    // return glob.split(/\*+/g, -1);
+    const parts: string[] = [];
+    let last: number = 0;
+    let from = text.indexOf("*");
+    while (from !== -1) {
+        parts.push(text.slice(last, from));
+        last = from + 1;
+        while (text.charAt(last) === "*") {
+            last++;
+        }
+        from = text.indexOf("*", last);
+    }
+    parts.push(text.slice(last));
+    return parts;
+}
+
 export function fastGlobMatch(
     glob: string,
     text: string,

@@ -93,6 +93,7 @@ export function applyPatchLog(
 
 /**
  * revert changes on the previous target
+ * use with storePrev set to true
  */
 export function revertPatchLog(
     patchLog: PatchResult[],
@@ -181,7 +182,7 @@ export function asLodashPath(pointer: string): string[] {
         return [];
     const parts: string[] = pointer.slice(1).split("/")
         .map((s) => unescapePathPart(s));
-    return !parts?.length ? [] : toPath(parts.join("."));
+    return !parts?.length ? [] : parts;
 }
 
 export function getPointerValue(document: any, pointer: string): any {
