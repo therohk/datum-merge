@@ -1,4 +1,4 @@
-import { get, set, toPath, unset } from "lodash-es";
+import { get, has, set, toPath, unset } from "lodash-es";
 import { isNullish, isPrimitive } from "./type-utils";
 import { deepClone, deepEquals } from "./datum-utils";
 import { Diff } from "./diff-lib/deep-diff";
@@ -73,20 +73,19 @@ export function applyPatchLog(
     let changed = false;
     for (const patchItem of patchLog) {
         const difPath: string[] = asLodashPath(patchItem.path);
-        if (patchItem.op === "test")
+        if (!difPath.length || patchItem.op === "test")
             continue;
         if (patchItem.op === "remove") {
             changed = unset(target, difPath) || changed;
             continue;
         }
+        const targetHas = has(target, difPath);
         const targetVal = get(target, difPath);
         const sourceVal = patchItem.value;
-        if (isNullish(targetVal) && isNullish(sourceVal))
+        if (targetHas && deepEquals(targetVal, sourceVal))
             continue;
-        if (isNullish(targetVal) || !deepEquals(targetVal, sourceVal)) {
-            set(target, difPath, deepClone(sourceVal));
-            changed = true;
-        }
+        set(target, difPath, deepClone(sourceVal));
+        changed = true;
     }
     return changed;
 }
@@ -104,7 +103,7 @@ export function revertPatchLog(
     let changed = false;
     for (const patchItem of patchLog) {
         const difPath: string[] = asLodashPath(patchItem.path);
-        if (patchItem.op === "test")
+        if (!difPath.length || patchItem.op === "test")
             continue;
         if (patchItem.op === "add") {
             changed = unset(target, difPath) || changed;
