@@ -20,23 +20,23 @@ describe("validate-merge-conf", () => {
         const mCodesBkp = deepClone(mCodes);
         const oCodesBkp = deepClone(oCodes);
 
-        expect(immutableDetailMerge(deepT, deepS, nCodes)).toEqual(deepT);
-        expect(immutableDetailMerge(deepT, deepS, {})).toEqual(deepT);
-        expect(immutableDetailMerge(deepT, deepS, yCodes)).toEqual(deepS);
-        expect(immutableDetailMerge(deepT, deepT, yCodes)).toEqual(deepT);
+        expect(immutableDetailMerge(deepT, deepS, nCodes)).toStrictEqual(deepT);
+        expect(immutableDetailMerge(deepT, deepS, {})).toStrictEqual(deepT);
+        expect(immutableDetailMerge(deepT, deepS, yCodes)).toStrictEqual(deepS);
+        expect(immutableDetailMerge(deepT, deepT, yCodes)).toStrictEqual(deepT);
 
         const mDeepT = immutableDetailMerge(deepT, deepS, mCodes);
         expect(mDeepT.oa.length).toBe(4);
-        expect(mDeepT.o).toEqual(deepS.o);
+        expect(mDeepT.o).toStrictEqual(deepS.o);
         expect(mDeepT.del).not.toBeDefined();
 
         const oDeepT = immutableDetailMerge(deepT, deepS, oCodes);
-        expect(oDeepT.oa).toEqual([{ b: "b" }]);
-        expect(oDeepT.o).toEqual({ z: ["c", "a", "b"] });
-        expect(oDeepT.del).toEqual("x");
+        expect(oDeepT.oa).toStrictEqual([{ b: "b" }]);
+        expect(oDeepT.o).toStrictEqual({ z: ["c", "a", "b"] });
+        expect(oDeepT.del).toStrictEqual("x");
 
-        expect(mCodes).toEqual(mCodesBkp);
-        expect(oCodes).toEqual(oCodesBkp);
+        expect(mCodes).toStrictEqual(mCodesBkp);
+        expect(oCodes).toStrictEqual(oCodesBkp);
     });
 
     test('should custom merge fields with filled config', async () => {
@@ -55,8 +55,8 @@ describe("validate-merge-conf", () => {
         const ucTrgBkp = deepClone(ucTrg);
 
         expect(fillUpdateCodes(ucTrg, {})).toMatchObject({ sc: UpdateCode.B, vc: UpdateCode.XS, m: UpdateCode.XS, pAt2: UpdateCode.B });
-        expect(Object.keys(fillUpdateCodes(ucTrg, {}))).toEqual(Object.keys(ucTrg));
-        expect(Object.keys(fillUpdateCodes(ucTest, {}))).toEqual(Object.keys(ucTest));
+        expect(Object.keys(fillUpdateCodes(ucTrg, {}))).toStrictEqual(Object.keys(ucTrg));
+        expect(Object.keys(fillUpdateCodes(ucTest, {}))).toStrictEqual(Object.keys(ucTest));
 
         expect(immutableCustomMerge(ucTrg, ucTest, { "*": UpdateCode.N })).toEqual(ucTrg);
         expect(immutableCustomMerge(ucTrg, ucTest, { vc: UpdateCode.XM }).vc).toEqual(["1", "2", "3"]);

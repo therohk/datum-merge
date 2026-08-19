@@ -36,8 +36,8 @@ describe("validate-diff-utils", () => {
         expect(srcUpd).toEqual(trgRem);
 
         //no side effects
-        expect(trg).toEqual(trgBkp);
-        expect(src).toEqual(srcBkp);
+        expect(trg).toStrictEqual(trgBkp);
+        expect(src).toStrictEqual(srcBkp);
     });
 
     test('should generate json patch from diff', async () => {
@@ -75,8 +75,8 @@ describe("validate-diff-utils", () => {
         expect(antiDiffTyped(src, trg, true)).toEqual({ oi: ["2", "1"] });
         expect(antiDiffTyped({ ...trg, ...sam }, { ...src, ...sam }, false)).toEqual(sam);
 
-        expect(trg).toEqual(trgBkp);
-        expect(src).toEqual(srcBkp);
+        expect(trg).toStrictEqual(trgBkp);
+        expect(src).toStrictEqual(srcBkp);
     });
 
 });
