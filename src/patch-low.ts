@@ -109,6 +109,7 @@ export function revertPatchLog(
             changed = unset(target, difPath) || changed;
             continue;
         }
+        // deepClone(patchItem.prev); //safer multiuse
         set(target, difPath, patchItem.prev);
         changed = true;
     }

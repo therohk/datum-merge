@@ -6,15 +6,13 @@ export function getObjectKeys(
     excludeKeys?: string[],
     includeKeys?: string[],
 ): string[] {
-    if (!obj) {
-        return [];
-    }
+    if (!obj) { return []; }
     let sourceKeys = Object.keys(obj);
-    if (includeKeys && !!includeKeys.length) {
+    if (includeKeys && includeKeys.length > 0) {
         includeKeys.filter((k) => !sourceKeys.includes(k))
             .forEach((k) => sourceKeys.push(k)); //no dupes
     }
-    if (excludeKeys && !!excludeKeys.length) {
+    if (excludeKeys && excludeKeys.length > 0) {
         sourceKeys = sourceKeys.filter((k) => !excludeKeys.includes(k));
     }
     return sourceKeys;
@@ -100,12 +98,10 @@ export function fastGlobMatch(
     if (glob === "*")
         return typeof text === "string";
     const globParts: string[] = glob.split(/\*+/g, -1);
+    //todo perf alloc
+    // const globParts: string[] = fastSplitGlobs(glob); 
     const partsLen = globParts.length;
-    if (partsLen === 0)
-        return !text;
     const prefix = globParts[0]!;
-    if (partsLen === 1)
-        return text === prefix;
     if (!text.startsWith(prefix))
         return false;
     let textIdx = prefix.length;

@@ -13,8 +13,8 @@ export type MergeResult<T = any> = {
 };
 
 /**
- * merge structured data and return diff
- * @returns diff or false if no changes
+ * merge structured data and return patch
+ * @returns patchlog or false if no changes
  */
 export function customMergePatch<T extends object>(
     target: T,
@@ -33,7 +33,6 @@ export function customMergePatch<T extends object>(
         case UpdateCode.Y:
             return bypassMergePatch(target, source);
     }
-    // const blockUnset = !updateCodeInfo(mergeConf.scalar).unset;
     const mergeCodes = fillUpdateCodes(source, mergeConf, false, excludeKeys);
     if (emptyObject(mergeCodes)) {
         return false;
@@ -49,7 +48,7 @@ export function customMergePatch<T extends object>(
 
 /**
  * bypass merge using direct assignment
- * @returns diff or false if no changes
+ * @returns patchlog or false if no changes
  */
 export function bypassMergePatch<T extends object>(
     target: T,

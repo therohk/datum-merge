@@ -43,12 +43,13 @@ Deep merge with generic config patterns :
 import { customMergeDiff, MergeConfig, UpdateCode } from "datum-merge";
 const conf: MergeConfig = {
     "*_id": UpdateCode.I,
+    aliases: "XM",
     scalar: UpdateCode.B,
     field1: UpdateCode.D,
-    "arr*": UpdateCode.XM,
+    ["arr*"]: UpdateCode.XS,
     nested: UpdateCode.N,
     obj1: {
-        scalar: UpdateCode.B,
+        scalar: UpdateCode.F,
         vector: UpdateCode.XM,
     },
 };
@@ -70,15 +71,21 @@ forcePatchLog(patch, anotherTarget); //op ignored, nulls deleted
 
 ## Upcoming Features
 
+<details>
+
 1. publish diff module as a standalone package ([available](/src/diff-lib/README.md)) .
 
-2. formalize config schema for deeply nested objects (for v1) .
+2. formalize config schema for deeply nested objects (for v2) .
 
-3. option to ignore errors for datatype mismatch during merge .
+3. ensure classes are consistently treated as scalar type .
 
-4. support custom equality check for vector labels .
+4. option to ignore errors for datatype mismatch during merge .
 
 5. better anti-diff function that retains deep similarities .
+
+6. support custom equality check for vector labels .
+
+</details>
 
 Code contributions are welcome via issues and pull requests .
 
