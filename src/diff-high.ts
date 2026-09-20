@@ -1,4 +1,5 @@
-import { emptyObject } from "./type-utils";
+import { emptyObject, isArrayOfAny, isNullish } from "./type-utils";
+import { getObjectKeys, isPlainObject } from "./datum-utils";
 import { Diff, applyChange, diff, orderIndependentDiff } from "./diff-lib/deep-diff";
 // import { Diff, applyChange, diff, orderIndependentDiff } from "deep-diff"; //old library
 
@@ -29,15 +30,6 @@ export function deepDiffTyped<T extends object>(
     return deltaObj;
 };
 
-function cleanupObjArrays(obj: any): void {
-    //remove empty items in array
-    for (const objKey of Object.keys(obj)) {
-        if (obj[objKey]?.filter) {
-            obj[objKey] = obj[objKey].filter((e: any) => !!e);
-        }
-    }
-}
-
 /**
  * pick common values into blank tuple
  * only considers changes for top level keys
@@ -57,7 +49,7 @@ export function antiDiffTyped<T extends object>(
     //find shallow changes
     const modFields: Set<string> = new Set<string>();
     differences.map((d) => d?.path)
-        .filter((p) => !!p && p.length > 0)
+        .filter((p) => !isNullish(p) && p.length > 0)
         .map((p) => (p?.[0] as PropertyKey).toString())
         .forEach((s) => modFields.add(s));
     //keep unchanged keys
@@ -82,6 +74,43 @@ export function deepDiffLow<T = any, S = T>(
 };
 
 //-----------------------------------------------------------------------------
+
+function cleanupObjArrays(obj: any): void {
+    //remove empty items in array
+    for (const objKey of Object.keys(obj)) {
+        if (obj[objKey]?.filter) {
+            obj[objKey] = obj[objKey].filter((e: any) => !isNullish(e));
+        }
+    }
+}
+
+export function deepCompact(
+    target: Record<string, any>,
+    // delEmpty: boolean = false,
+): boolean {
+    let changed = false;
+    for (const label of getObjectKeys(target)) {
+        const value = target[label];
+        if (isArrayOfAny(value)) {
+            const prevLen = value.length;
+            const compact = value.filter((v) => !isNullish(v));
+            let deepChange = false;
+            compact.forEach((v) => {
+                deepChange = isPlainObject(v) ? deepCompact(v) : deepChange;
+            });
+            if (prevLen !== compact.length || deepChange) {
+                target[label] = compact;
+                changed = true;
+            }
+            continue;
+        }
+        if (isPlainObject(value)) {
+            changed = deepCompact(value) || changed;
+            continue;
+        }
+    }
+    return changed;
+}
 
 export function deepDiffFlat(
     oldFlat: any, //target

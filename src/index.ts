@@ -12,6 +12,7 @@ export { diffToPatchLog, deepPatchLog } from "./patch-low";
 export { applyPatchLog, revertPatchLog } from "./patch-low";
 export { forcePatchLog, getPointerValue } from "./patch-low";
 export { immutablePatch } from "./patch-low";
+export { deepCompact } from "./diff-high";
 
 export { UpdateCode } from "./merge-low";
 export { UpdateCode as MC } from "./merge-low";
