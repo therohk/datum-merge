@@ -117,6 +117,7 @@ export function deepDiffFlat(
     newFlat: any, //source
     flatten: boolean = true,
 ): [any, any] {
+    //parallel path for tests only
     if (flatten) {
         oldFlat = flattenObject(oldFlat);
         newFlat = flattenObject(newFlat);

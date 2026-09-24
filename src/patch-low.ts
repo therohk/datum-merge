@@ -7,7 +7,7 @@ import { deepDiffLow } from "./diff-high";
 export type PatchResult<T = any> = {
     path: string;
     op: "add" | "remove" | "replace" | "test";
-    value?: Readonly<T>;
+    value?: T;
     prev?: any;
 };
 
@@ -15,6 +15,7 @@ export type PatchResult<T = any> = {
  * convert deep diff to json patch model
  * only requires add/replace/remove operations
  * can be used with the result of any diff
+ * works with any json-patch rfc implementation
  */
 export function diffToPatchLog(
     differences: readonly Diff<any, any>[],
@@ -61,8 +62,10 @@ export function deepPatchLog(
 };
 
 /**
- * subset of standard json patch format
  * reapply patch on a fresh target
+ * only works with locally generated patches
+ * logic differs from json patch for arrays
+ * @returns false if no changes
  */
 export function applyPatchLog(
     patchLog: PatchResult[],
@@ -75,11 +78,12 @@ export function applyPatchLog(
         const difPath: string[] = asLodashPath(patchItem.path);
         if (!difPath.length || patchItem.op === "test")
             continue;
+        const targetHas = has(target, difPath);
         if (patchItem.op === "remove") {
-            changed = unset(target, difPath) || changed;
+            unset(target, difPath);
+            changed = targetHas || changed;
             continue;
         }
-        const targetHas = has(target, difPath);
         const targetVal = get(target, difPath);
         const sourceVal = patchItem.value;
         if (targetHas && deepEquals(targetVal, sourceVal))
@@ -92,7 +96,7 @@ export function applyPatchLog(
 
 /**
  * revert changes on the previous target
- * use with storePrev set to true
+ * ensure storePrev=true and orderInd=false
  */
 export function revertPatchLog(
     patchLog: PatchResult[],
@@ -106,7 +110,8 @@ export function revertPatchLog(
         if (!difPath.length || patchItem.op === "test")
             continue;
         if (patchItem.op === "add") {
-            changed = unset(target, difPath) || changed;
+            unset(target, difPath);
+            changed = true;
             continue;
         }
         // deepClone(patchItem.prev); //safer multiuse
@@ -117,8 +122,9 @@ export function revertPatchLog(
 }
 
 /**
- * unofficial json merge-patch format 
+ * unofficial json force patch format
  * op is ignored and nulls are removed
+ * accepts pointer or dot delimited paths
  */
 export function forcePatchLog(
     patchLog: { path: string, value?: unknown }[],

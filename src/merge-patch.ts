@@ -7,7 +7,7 @@ import { DetailConfig, MergeConfig, detailMerge, fillUpdateCodes } from "./merge
 export type MergeResult<T = any> = {
     path: string;
     op: "add" | "remove" | "replace";
-    value?: Readonly<T>;
+    value?: T;
     prev?: Readonly<T>;
     code: MergeCode;
 };
