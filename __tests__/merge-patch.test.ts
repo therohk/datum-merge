@@ -1,4 +1,5 @@
 import { deepClone } from "../src/datum-utils";
+import { deepCompact } from "../src/diff-high";
 import { UpdateCode } from "../src/merge-low";
 import { MergeConfig, immutableCustomMerge } from "../src/merge-conf";
 import { bypassMergePatch, customMergePatch } from "../src/merge-patch";
@@ -7,15 +8,19 @@ import { deepPatchLog, immutablePatch } from "../src/patch-low";
 describe("validate-merge-patch", () => {
 
     const ucTrg = {
-        sc: "t", vc: ["1", "2"], m: ["2"], pAt2: 3,
-        sty: "s", dme: "s",
+        sc: "t", pAt2: 3,
+        vc: ["1", "2"], m: ["2"], vcd: ["1"],
+        vca: ["2"], vcr: ["3", "1", "2"],
+        sty: "s", dme: "s", dme2: "s",
         ono: [{ a: "2" }],
         obu: { y: "t" }, oba: { z: [2] },
-        obx: { l: 4 }, obd: { d: 1 }
+        obx: { l: 4 }, obd: { d: 1 },
     };
 
     const ucSrc = {
-        sc: "s", vc: ["3", "1"], m: ["3"], pAt: "val", pAt2: 2,
+        sc: "s", pAt: "val", pAt2: 2,
+        vc: ["3", "1"], m: ["3"], vcn: ["1"],
+        vca: ["1", "3"], vcr: ["1"],
         e1: null, e2: undefined, e3: {}, e4: [], dme: null,
         ono: [{ a: "1" }, { a: "2" }],
         obs: { x: 1, y: "s" }, obv: { x: 2 },
@@ -31,8 +36,11 @@ describe("validate-merge-patch", () => {
 
     const mc: MergeConfig = {
         m: UpdateCode.XF,
-        vc: UpdateCode.XI,
+        ["vc*"]: UpdateCode.XR,
+        vca: UpdateCode.XM,
+        vcr: UpdateCode.XI,
         dme: UpdateCode.D,
+        dme2: UpdateCode.D, //skipped
         ono: UpdateCode.XM,
         vector: UpdateCode.N,
         ["*A*"]: UpdateCode.I,
@@ -70,6 +78,22 @@ describe("validate-merge-patch", () => {
         expect(unpatchedOne).toEqual(ucTrg);
         expect(unpatchedTwo).toEqual(ucTrg);
 
+        //jest doesnt pick holes
+        // expect(patchedOne).toStrictEqual(mergedOne);
+        expect(unpatchedOne).toStrictEqual(unpatchedTwo); //same holes
+        // expect(unpatchedOne).toStrictEqual(ucTrg);
+        // expect(unpatchedTwo).toStrictEqual(ucTrg);
+
+        const p1Clone = deepClone(patchedOne);
+        expect(p1Clone).not.toStrictEqual(patchedOne);
+
+        const compP1 = deepCompact(patchedOne);
+        const compUp1 = deepCompact(unpatchedOne);
+        const compUp2 = deepCompact(unpatchedTwo);
+        expect(patchedOne).toStrictEqual(mergedOne);
+        expect(unpatchedOne).toStrictEqual(ucTrg);
+        expect(unpatchedTwo).toStrictEqual(ucTrg);
+
         const forced1 = customMergePatch<any>(deepClone(ucTrg), ucSrc, yc) || [];
         const forced2 = bypassMergePatch<any>(deepClone(ucTrg), ucSrc) || [];
         expect(forced1).not.toEqual(forced2);
@@ -80,7 +104,6 @@ describe("validate-merge-patch", () => {
         expect(target3).not.toEqual(ucTrg);
         expect(immutablePatch(target3, merged3, "revert")).toEqual(ucTrg);
         expect(immutablePatch(ucTrg, merged3, "apply")).toEqual(target3);
-
     });
 
 });
