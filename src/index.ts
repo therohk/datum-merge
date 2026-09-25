@@ -4,7 +4,6 @@ export { deepClone } from "./datum-utils";
 
 export { deepDiffLow } from "./diff-high";
 export { deepDiffTyped, antiDiffTyped } from "./diff-high";
-export { deepDiffFlat } from "./diff-high";
 export { flattenObject, unflattenObject } from "./diff-high";
 
 export { type PatchResult } from "./patch-low";

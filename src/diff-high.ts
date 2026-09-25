@@ -135,42 +135,40 @@ export function deepDiffFlat(
 }
 
 export function flattenObject(
-    obj: { [key: string]: any }
-): { [key: string]: any } {
-    const flatObj: { [key: string]: any } = {};
-    const path: any[] = [];
-    const isObject = (value: any) => Object(value) === value;
-    function dig(obj: any) {
-        for (const [key, value] of Object.entries(obj)) {
-            path.push(key);
-            if (isObject(value)) {
-                dig(value);
+    obj: Record<string, any>
+): Record<string, any> {
+    const flatObj: Record<string, any> = {};
+    const parts: string[] = [];
+    function dfs(obj: any): void {
+        for (const [label, value] of Object.entries(obj)) {
+            parts.push(label);
+            if (Object(value) === value) {
+                dfs(value);
             } else {
-                flatObj[path.join('.')] = value;
+                flatObj[parts.join('.')] = value;
             }
-            path.pop();
+            parts.pop();
         }
     }
-    dig(obj);
+    dfs(obj);
     return flatObj;
 }
 
 export function unflattenObject(
-    flatObj: { [key: string]: any }
-): { [key: string]: any } {
-    const unflatObj: { [key: string]: any } = {};
+    flatObj: Record<string, any>
+): Record<string, any> {
+    const unflatObj: Record<string, any> = {};
     for (const [path, value] of Object.entries(flatObj)) {
-        const parts = path.split('.');
+        const parts: string[] = path.split('.');
         let obj = unflatObj;
-        for (const [i, key] of parts.slice(0, -1).entries()) {
-            if (!obj[key]) {
-                const needArray = Number.isInteger(Number(parts[+i + 1]));
-                obj[key] = needArray ? [] : {};
+        for (const [d, label] of parts.slice(0, -1).entries()) {
+            if (!obj[label]) {
+                const needArray = Number.isInteger(Number(parts[+d + 1]));
+                obj[label] = needArray ? [] : {};
             }
-            obj = obj[key];
+            obj = obj[label];
         }
-        const lastkey = parts.pop();
-        obj[lastkey!] = value;
+        obj[parts.pop()!] = value;
     }
     return unflatObj;
 }
